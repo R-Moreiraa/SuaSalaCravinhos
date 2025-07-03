@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carrossel Animado com Firebase</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Carrossel Animado</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;400;700;900&display=swap');
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Poppins', sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
       color: #fff;
-      min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
+      min-height: 100vh;
     }
 
-    .header {
+    header {
+      width: 100%;
+      max-width: 100%;
+      padding-left: 100px;
+      height: 70px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 20px 50px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(10px);
-      position: sticky;
-      top: 0;
+      position: relative;
       z-index: 1000;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
     }
 
     .logo {
@@ -40,292 +40,258 @@
       gap: 10px;
       font-size: 24px;
       font-weight: bold;
-      color: #4CAF50;
+      color: #14ff72;
+      margin-right: 40px;
     }
 
     .logo i {
       font-size: 28px;
     }
 
-    .nav-links {
-      display: flex;
-      gap: 20px;
-    }
-
-    .nav-links a {
+    header nav a {
       color: #fff;
+      margin-right: 15px;
+      padding: 8px 16px;
+      font-size: 16px;
+      transition: 0.2s;
       text-decoration: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      transition: all 0.3s;
-      font-weight: 500;
+      border-radius: 4px;
     }
 
-    .nav-links a:hover, .nav-links a.active {
-      background: #4CAF50;
+    a.active,
+    a:hover {
+      background: #14ff72;
       color: #000;
     }
 
-    .hero {
-      text-align: center;
-      padding: 50px 20px;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .hero h1 {
-      font-size: 3.5rem;
-      margin-bottom: 20px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-      background: linear-gradient(to right, #4CAF50, #8BC34A);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero p {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
-      line-height: 1.6;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-
-    .carousel-container {
-      position: relative;
-      height: 500px;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-      margin-bottom: 80px;
-    }
-
     .carousel {
-      height: 100%;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
       position: relative;
     }
 
-    .carousel-item {
+    .list {
+      height: 100%;
+    }
+
+    .carousel .list .item {
+      width: 180px;
+      height: 250px;
       position: absolute;
+      top: 80%;
+      transform: translateY(-70%);
+      left: 70%;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      background-position: center;
+      background-size: cover;
+      z-index: 100;
+      transition: 1s;
+      overflow: hidden;
+    }
+
+    .carousel .list .item:nth-child(1),
+    .carousel .list .item:nth-child(2) {
       top: 0;
       left: 0;
+      transform: translate(0, 0);
+      border-radius: 0;
       width: 100%;
       height: 100%;
-      background-size: cover;
-      background-position: center;
+    }
+
+    .carousel .list .item:nth-child(3) { left: 67%; }
+    .carousel .list .item:nth-child(4) { left: calc(67% + 200px); }
+    .carousel .list .item:nth-child(5) { left: calc(67% + 400px); }
+    .carousel .list .item:nth-child(6) { left: calc(67% + 600px); }
+    .carousel .list .item:nth-child(n+7) {
+      left: calc(67% + 800px);
       opacity: 0;
-      transition: opacity 1s ease-in-out;
-      display: flex;
-      align-items: center;
     }
 
-    .carousel-item.active {
-      opacity: 1;
-    }
-
-    .carousel-content {
-      background: rgba(0, 0, 0, 0.7);
-      max-width: 600px;
-      padding: 30px;
-      margin-left: 50px;
+    .list .item .content {
+      position: absolute;
+      top: 50%;
+      left: 100px;
+      transform: translateY(-50%);
+      width: 400px;
+      text-align: left;
+      color: #fff;
+      display: none;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.6);
       border-radius: 15px;
       backdrop-filter: blur(5px);
-      border: 1px solid rgba(76, 175, 80, 0.3);
-      transform: translateX(-20px);
-      animation: slideIn 0.8s forwards 0.5s;
     }
 
-    @keyframes slideIn {
-      to { transform: translateX(0); opacity: 1; }
+    .list .item:nth-child(1) .content {
+      display: block;
     }
 
-    .carousel-content h2 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      color: #4CAF50;
+    .content .title {
+      font-size: 60px;
+      text-transform: uppercase;
+      color: #14ff72;
+      font-weight: bold;
+      line-height: 1;
+      opacity: 0;
+      animation: animate 1s ease-in-out 0.3s 1 forwards;
     }
 
-    .carousel-content h3 {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    .content .name {
+      font-size: 80px;
+      text-transform: uppercase;
+      font-weight: bold;
+      line-height: 1;
+      text-shadow: 3px 4px 4px rgba(0, 0, 0, 0.8);
+      opacity: 0;
+      animation: animate 1s ease-in-out 0.6s 1 forwards;
+      margin: 10px 0;
     }
 
-    .carousel-content p {
-      font-size: 1.1rem;
+    .content .des {
+      margin-top: 10px;
       margin-bottom: 20px;
+      font-size: 18px;
+      opacity: 0;
+      animation: animate 1s ease-in-out 0.9s 1 forwards;
       line-height: 1.6;
     }
 
-    .carousel-buttons {
+    .content .btn {
+      opacity: 0;
+      animation: animate 1s ease-in-out 1.2s 1 forwards;
       display: flex;
       gap: 15px;
     }
 
-    .btn {
+    .content .btn button {
       padding: 12px 25px;
       border: none;
-      border-radius: 5px;
-      font-size: 1rem;
-      font-weight: bold;
       cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 5px;
       transition: all 0.3s;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .btn-primary {
-      background: #4CAF50;
-      color: #fff;
+    .content .btn button:nth-child(1) {
+      background: #14ff72;
+      color: #000;
     }
 
-    .btn-secondary {
+    .content .btn button:nth-child(2) {
       background: transparent;
-      color: #4CAF50;
-      border: 2px solid #4CAF50;
+      color: #14ff72;
+      border: 2px solid #14ff72;
     }
 
-    .btn:hover {
+    .content .btn button:hover {
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+      box-shadow: 0 5px 15px rgba(20, 255, 114, 0.4);
     }
 
-    .carousel-controls {
+    @keyframes animate {
+      from {
+        opacity: 0;
+        transform: translate(0, 100px);
+        filter: blur(33px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(0);
+        filter: blur(0);
+      }
+    }
+
+    .arrows {
       position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 15px;
+      top: 80%;
+      right: 52%;
       z-index: 100;
+      width: 300px;
+      max-width: 30%;
+      display: flex;
+      gap: 10px;
+      align-items: center;
     }
 
-    .control-btn {
-      width: 50px;
-      height: 50px;
+    .arrows button {
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background: rgba(76, 175, 80, 0.8);
-      color: #fff;
+      background-color: #14ff72;
+      color: #000;
       border: none;
-      font-size: 1.2rem;
+      font-size: 20px;
       cursor: pointer;
+      transition: .5s;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s;
     }
 
-    .control-btn:hover {
+    .arrows button:hover {
       background: #fff;
-      color: #4CAF50;
       transform: scale(1.1);
     }
 
-    .carousel-indicators {
+    .carousel .timeRunning {
       position: absolute;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      gap: 10px;
-      z-index: 100;
+      z-index: 1000;
+      width: 0%;
+      height: 4px;
+      background-color: #14ff72;
+      left: 0;
+      top: 0;
+      animation: runningTime 7s linear 1 forwards;
+      box-shadow: 0 0 10px #14ff72;
     }
 
-    .indicator {
+    @keyframes runningTime {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    .indicators {
+      position: absolute;
+      bottom: 50px;
+      right: 100px;
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+    }
+
+    .indicators span {
+      display: block;
       width: 15px;
       height: 15px;
       border-radius: 50%;
       background: rgba(255, 255, 255, 0.3);
       cursor: pointer;
-      transition: all 0.3s;
+      transition: 0.3s;
     }
 
-    .indicator.active {
-      background: #4CAF50;
+    .indicators span.active {
+      background: #14ff72;
       transform: scale(1.2);
-    }
-
-    .firebase-info {
-      background: rgba(0, 0, 0, 0.8);
-      border-radius: 15px;
-      padding: 30px;
-      margin-top: 50px;
-      border: 2px solid #4CAF50;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .firebase-info h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #4CAF50;
-      font-size: 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 15px;
-    }
-
-    .firebase-info h2 i {
-      font-size: 2.5rem;
-    }
-
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 30px;
-    }
-
-    .step {
-      background: rgba(30, 30, 40, 0.7);
-      padding: 25px;
-      border-radius: 10px;
-      border-left: 4px solid #4CAF50;
-      transition: transform 0.3s;
-    }
-
-    .step:hover {
-      transform: translateY(-5px);
-    }
-
-    .step h3 {
-      color: #4CAF50;
-      margin-bottom: 15px;
-      font-size: 1.4rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .step p {
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    .step code {
-      background: rgba(0, 0, 0, 0.4);
-      padding: 5px 10px;
-      border-radius: 4px;
-      font-family: monospace;
-      display: block;
-      margin: 10px 0;
-      overflow-x: auto;
     }
 
     .github-section {
       text-align: center;
       padding: 60px 20px;
       background: rgba(0, 0, 0, 0.7);
-      margin-top: 80px;
+      margin-top: 50px;
     }
 
     .github-section h2 {
       font-size: 2.5rem;
       margin-bottom: 30px;
-      color: #4CAF50;
+      color: #14ff72;
     }
 
     .github-btn {
@@ -345,7 +311,7 @@
     }
 
     .github-btn:hover {
-      background: #4CAF50;
+      background: #14ff72;
       transform: translateY(-5px);
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     }
@@ -355,329 +321,235 @@
       padding: 30px;
       background: rgba(0, 0, 0, 0.9);
       margin-top: 50px;
-      border-top: 1px solid #4CAF50;
+      border-top: 1px solid #14ff72;
     }
 
-    @media (max-width: 768px) {
-      .header {
-        flex-direction: column;
-        padding: 15px;
-      }
-      
-      .nav-links {
-        margin-top: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-      
-      .carousel-container {
-        height: 400px;
-      }
-      
-      .carousel-content {
-        margin: 20px;
-        padding: 20px;
-      }
-      
-      .carousel-content h2 {
-        font-size: 2rem;
-      }
-      
-      .carousel-content h3 {
-        font-size: 2.2rem;
-      }
+    @media screen and (max-width: 999px) {
+      header { padding-left: 50px; }
+      .list .item .content { left: 50px; width: 350px; }
+      .content .title { font-size: 50px; }
+      .content .name { font-size: 60px; }
+      .content .des { font-size: 16px; }
+      .arrows { top: 75%; right: 45%; }
     }
 
-    .loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      gap: 20px;
+    @media screen and (max-width: 768px) {
+      header { padding: 0 20px; height: 60px; }
+      .logo span { display: none; }
+      header nav a { padding: 6px 12px; font-size: 14px; margin-right: 5px; }
+      .list .item .content { left: 20px; top: 40%; width: 85%; }
+      .content .title { font-size: 40px; }
+      .content .name { font-size: 50px; }
+      .content .des { font-size: 14px; }
+      .content .btn { flex-direction: column; }
+      .arrows { top: 70%; right: 30%; }
+      .indicators { right: 20px; bottom: 20px; }
     }
 
-    .spinner {
-      width: 60px;
-      height: 60px;
-      border: 5px solid rgba(76, 175, 80, 0.3);
-      border-top: 5px solid #4CAF50;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @media screen and (max-width: 480px) {
+      .carousel .list .item:nth-child(3) { left: 50%; }
+      .carousel .list .item:nth-child(4) { left: calc(50% + 150px); }
+      .carousel .list .item:nth-child(5) { left: calc(50% + 300px); }
+      .arrows { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <div class="loader">
-    <div class="spinner"></div>
-    <p>Conectando ao Firebase...</p>
-  </div>
-
-  <header class="header">
+  <header>
     <div class="logo">
-      <i class="fas fa-fire"></i>
-      <span>FireCarousel</span>
+      <i class="fas fa-play-circle"></i>
+      <span>CARROSSEL</span>
     </div>
-    <nav class="nav-links">
+    <nav>
       <a href="#" class="active">Home</a>
       <a href="#">Sobre</a>
-      <a href="#">Carrossel</a>
-      <a href="#">Firebase</a>
-      <a href="#">GitHub</a>
+      <a href="#">Portfólio</a>
+      <a href="#">Serviços</a>
+      <a href="#">Contato</a>
     </nav>
   </header>
 
-  <section class="hero">
-    <h1>Carrossel Animado com Firebase</h1>
-    <p>Uma solução completa de carrossel integrada com Firebase Firestore, pronta para hospedagem no GitHub Pages</p>
-  </section>
+  <div class="carousel">
+    <div class="list">
+      <div class="item" style="background-image: url('https://images.unsplash.com/photo-1551085254-e96b210db58a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80');">
+        <div class="content">
+          <div class="title">CARROSSEL</div>
+          <div class="name">ÁGUIA</div>
+          <div class="des">A águia é conhecida por sua visão aguçada e voo majestoso, representando força e liberdade.</div>
+          <div class="btn">
+            <button><i class="fas fa-eye"></i> Ver mais</button>
+            <button><i class="fas fa-user-plus"></i> Inscreva-se</button>
+          </div>
+        </div>
+      </div>
 
-  <div class="container">
-    <div class="carousel-container">
-      <div class="carousel" id="carousel">
-        <!-- Os itens do carrossel serão inseridos aqui pelo JavaScript -->
+      <div class="item" style="background-image: url('https://images.unsplash.com/photo-1597848212624-a19eb35e2651?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80');">
+        <div class="content">
+          <div class="title">CARROSSEL</div>
+          <div class="name">CORUJA</div>
+          <div class="des">A coruja simboliza sabedoria e intuição, sendo uma caçadora noturna com habilidades excepcionais.</div>
+          <div class="btn">
+            <button><i class="fas fa-eye"></i> Ver mais</button>
+            <button><i class="fas fa-user-plus"></i> Inscreva-se</button>
+          </div>
+        </div>
       </div>
-      <div class="carousel-controls">
-        <button class="control-btn prev"><i class="fas fa-arrow-left"></i></button>
-        <button class="control-btn next"><i class="fas fa-arrow-right"></i></button>
+
+      <div class="item" style="background-image: url('https://i.postimg.cc/Y0BmFGD5/676946559.jpg');">
+        <div class="content">
+          <div class="title">CARROSSEL</div>
+          <div class="name">TIGRE</div>
+          <div class="des">O tigre é o maior felino do mundo, símbolo de poder, força e coragem na natureza.</div>
+          <div class="btn">
+            <button><i class="fas fa-eye"></i> Ver mais</button>
+            <button><i class="fas fa-user-plus"></i> Inscreva-se</button>
+          </div>
+        </div>
       </div>
-      <div class="carousel-indicators" id="indicators">
-        <!-- Os indicadores serão inseridos aqui pelo JavaScript -->
+
+      <div class="item" style="background-image: url('https://i.postimg.cc/598zVg6b/expedia-group-10030674-9595f1-351116.jpg');">
+        <div class="content">
+          <div class="title">CARROSSEL</div>
+          <div class="name">LEÃO</div>
+          <div class="des">Conhecido como o rei da selva, o leão representa liderança, coragem e força majestosa.</div>
+          <div class="btn">
+            <button><i class="fas fa-eye"></i> Ver mais</button>
+            <button><i class="fas fa-user-plus"></i> Inscreva-se</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="item" style="background-image: url('https://i.postimg.cc/yxh3y1wk/sala-comercial-para-alugar-100m-no-cravinhos.webp');">
+        <div class="content">
+          <div class="title">CARROSSEL</div>
+          <div class="name">LOBO</div>
+          <div class="des">O lobo é um símbolo de lealdade, trabalho em equipe e instinto de sobrevivência na natureza.</div>
+          <div class="btn">
+            <button><i class="fas fa-eye"></i> Ver mais</button>
+            <button><i class="fas fa-user-plus"></i> Inscreva-se</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="firebase-info">
-      <h2><i class="fab fa-firebase"></i> Hospedagem no GitHub Pages com Firebase</h2>
-      
-      <div class="steps">
-        <div class="step">
-          <h3><i class="fas fa-database"></i> 1. Configurar o Firebase</h3>
-          <p>Crie um projeto no Firebase Console e configure o Firestore:</p>
-          <code>Coleção: carousel</code>
-          <p>Documentos com campos: title, name, description, image, button1, button2, order</p>
-        </div>
-        
-        <div class="step">
-          <h3><i class="fab fa-github"></i> 2. Criar Repositório</h3>
-          <p>Crie um novo repositório no GitHub com seu projeto:</p>
-          <code>https://github.com/[seu-usuario]/[seu-repositorio]</code>
-          <p>Adicione os arquivos HTML, CSS e JS do carrossel</p>
-        </div>
-        
-        <div class="step">
-          <h3><i class="fas fa-cog"></i> 3. Configurar GitHub Pages</h3>
-          <p>No repositório, vá em Settings > Pages:</p>
-          <p>Selecione o branch (geralmente main ou gh-pages) e a pasta (root ou /docs)</p>
-          <p>Salve e aguarde a publicação</p>
-        </div>
-        
-        <div class="step">
-          <h3><i class="fas fa-lock"></i> 4. Configurar Regras de Segurança</h3>
-          <p>No Firebase, configure as regras do Firestore para permitir leitura pública:</p>
-          <code>
-            rules_version = '2';<br>
-            service cloud.firestore {<br>
-              match /databases/{database}/documents {<br>
-                match /carousel/{document=**} {<br>
-                  allow read: if true;<br>
-                }<br>
-              }<br>
-            }
-          </code>
-        </div>
-      </div>
+    <div class="arrows">
+      <button class="prev"><i class="fas fa-arrow-left"></i></button>
+      <button class="next"><i class="fas fa-arrow-right"></i></button>
     </div>
+
+    <div class="indicators" id="indicators">
+      <!-- Indicadores serão gerados dinamicamente -->
+    </div>
+
+    <div class="timeRunning"></div>
   </div>
 
   <section class="github-section">
-    <h2>Pronto para Hospedar no GitHub Pages?</h2>
-    <p>Este carrossel está totalmente configurado para funcionar com o Firebase Firestore no GitHub Pages!</p>
+    <h2>Pronto para implementar em seu site?</h2>
+    <p>Este carrossel animado está pronto para ser integrado em qualquer projeto web</p>
     <a href="#" class="github-btn">
-      <i class="fab fa-github"></i> Publicar no GitHub Pages
+      <i class="fab fa-github"></i> Obter Código Completo
     </a>
   </section>
 
   <footer class="footer">
-    <p>Carrossel Animado com Firebase &copy; 2023 - Hospedagem no GitHub Pages</p>
-    <p>Desenvolvido com HTML, CSS, JavaScript e Firebase Firestore</p>
+    <p>Carrossel Animado &copy; 2023 - Implementação Completa</p>
+    <p>Desenvolvido com HTML, CSS e JavaScript</p>
   </footer>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-  
   <script>
-     <script>
-    // Config Firebase - substitua pelos seus dados
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
-      authDomain: "suasalacravinhos.firebaseapp.com",
-      projectId: "suasalacravinhos",
-      storageBucket: "suasalacravinhos.appspot.com",
-      messagingSenderId: "689313544330",
-      appId: "1:689313544330:web:1c81b55119732be02a9573",
-      measurementId: "G-5JW5YJRQ01"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
     // Elementos DOM
-    const carousel = document.getElementById('carousel');
-    const indicatorsContainer = document.getElementById('indicators');
-    const prevBtn = document.querySelector('.prev');
     const nextBtn = document.querySelector('.next');
-    const loader = document.querySelector('.loader');
+    const prevBtn = document.querySelector('.prev');
+    const carousel = document.querySelector('.carousel');
+    const list = document.querySelector('.list');
+    const runningTime = document.querySelector('.carousel .timeRunning');
+    const indicatorsContainer = document.getElementById('indicators');
 
-    // Variáveis do carrossel
-    let currentIndex = 0;
-    let slides = [];
-    let slidesCount = 0;
-    let autoSlideInterval;
+    // Configurações
+    let timeRunningDur = 3000;
+    let timeAutoNext = 7000;
+    let currentActive = 1;
+    let runTimeOut;
+    let runNextAuto;
 
-    // Função para buscar slides do Firestore
-    async function fetchSlides() {
-      try {
-        // Autenticação anônima (necessária para GitHub Pages)
-        await auth.signInAnonymously();
-        
-        const querySnapshot = await db.collection('carousel').orderBy('order').get();
-        slides = [];
-        
-        querySnapshot.forEach(doc => {
-          slides.push({ id: doc.id, ...doc.data() });
-        });
-        
-        slidesCount = slides.length;
-        
-        if (slidesCount > 0) {
-          renderSlides();
-          renderIndicators();
-          showSlide(currentIndex);
-          startAutoSlide();
-          loader.style.display = 'none';
-        } else {
-          loader.querySelector('p').textContent = 'Nenhum slide encontrado!';
-        }
-      } catch (error) {
-        console.error("Erro ao buscar slides: ", error);
-        loader.querySelector('p').textContent = 'Erro ao conectar com Firebase.';
+    // Função para mostrar o slider
+    function showSlider(type) {
+      const sliderItems = list.querySelectorAll('.item');
+      
+      if (type === 'next') {
+        list.appendChild(sliderItems[0]);
+        carousel.classList.add('next');
+        currentActive = (currentActive + 1) % sliderItems.length;
+      } else {
+        list.prepend(sliderItems[sliderItems.length - 1]);
+        carousel.classList.add('prev');
+        currentActive = (currentActive - 1 + sliderItems.length) % sliderItems.length;
       }
+
+      clearTimeout(runTimeOut);
+      runTimeOut = setTimeout(() => {
+        carousel.classList.remove('next');
+        carousel.classList.remove('prev');
+      }, timeRunningDur);
+
+      clearTimeout(runNextAuto);
+      runNextAuto = setTimeout(() => showSlider('next'), timeAutoNext);
+
+      resetTimeAnimation();
+      updateIndicators();
     }
 
-    // Renderizar slides
-    function renderSlides() {
-      carousel.innerHTML = '';
-      
-      slides.forEach((slide, index) => {
-        const slideElement = document.createElement('div');
-        slideElement.className = 'carousel-item';
-        slideElement.style.backgroundImage = `url('${slide.image}')`;
-        slideElement.style.opacity = '0';
-        
-        slideElement.innerHTML = `
-          <div class="carousel-content">
-            <h2>${slide.title}</h2>
-            <h3>${slide.name}</h3>
-            <p>${slide.description}</p>
-            <div class="carousel-buttons">
-              <button class="btn btn-primary">
-                <i class="fas fa-eye"></i> ${slide.button1}
-              </button>
-              <button class="btn btn-secondary">
-                <i class="fas fa-user-plus"></i> ${slide.button2}
-              </button>
-            </div>
-          </div>
-        `;
-        
-        carousel.appendChild(slideElement);
+    // Reiniciar animação da barra de tempo
+    function resetTimeAnimation() {
+      runningTime.style.animation = 'none';
+      runningTime.offsetHeight; // Força o reflow
+      runningTime.style.animation = null;
+      runningTime.style.animation = 'runningTime 7s linear 1 forwards';
+    }
+
+    // Atualizar indicadores
+    function updateIndicators() {
+      const indicators = indicatorsContainer.querySelectorAll('span');
+      indicators.forEach((indicator, index) => {
+        indicator.classList.toggle('active', index === currentActive);
       });
     }
 
-    // Renderizar indicadores
-    function renderIndicators() {
+    // Criar indicadores
+    function createIndicators() {
+      const items = list.querySelectorAll('.item');
       indicatorsContainer.innerHTML = '';
       
-      for (let i = 0; i < slidesCount; i++) {
-        const indicator = document.createElement('div');
-        indicator.className = 'indicator';
-        if (i === currentIndex) indicator.classList.add('active');
-        indicator.addEventListener('click', () => showSlide(i));
+      items.forEach((_, index) => {
+        const indicator = document.createElement('span');
+        indicator.classList.toggle('active', index === currentActive);
+        indicator.addEventListener('click', () => {
+          // Lógica para navegar para o slide específico
+          const diff = index - currentActive;
+          if (diff > 0) {
+            for (let i = 0; i < diff; i++) {
+              showSlider('next');
+            }
+          } else if (diff < 0) {
+            for (let i = 0; i < Math.abs(diff); i++) {
+              showSlider('prev');
+            }
+          }
+        });
         indicatorsContainer.appendChild(indicator);
-      }
-    }
-
-    // Mostrar slide específico
-    function showSlide(index) {
-      // Atualizar índice atual
-      currentIndex = index;
-      
-      // Atualizar classes dos slides
-      const items = document.querySelectorAll('.carousel-item');
-      
-      items.forEach((item, i) => {
-        item.classList.remove('active');
-        if (i === index) {
-          setTimeout(() => {
-            item.classList.add('active');
-          }, 10);
-        }
       });
-      
-      // Atualizar indicadores
-      const indicators = document.querySelectorAll('.indicator');
-      indicators.forEach((indicator, i) => {
-        indicator.classList.toggle('active', i === currentIndex);
-      });
-      
-      // Reiniciar o temporizador de slides automáticos
-      clearInterval(autoSlideInterval);
-      startAutoSlide();
     }
 
-    // Iniciar troca automática de slides
-    function startAutoSlide() {
-      autoSlideInterval = setInterval(() => {
-        nextSlide();
-      }, 5000);
-    }
+    // Event listeners
+    nextBtn.addEventListener('click', () => showSlider('next'));
+    prevBtn.addEventListener('click', () => showSlider('prev'));
 
-    // Próximo slide
-    function nextSlide() {
-      currentIndex = (currentIndex + 1) % slidesCount;
-      showSlide(currentIndex);
-    }
-
-    // Slide anterior
-    function prevSlide() {
-      currentIndex = (currentIndex - 1 + slidesCount) % slidesCount;
-      showSlide(currentIndex);
-    }
-
-    // Event Listeners
-    prevBtn.addEventListener('click', prevSlide);
-    nextBtn.addEventListener('click', nextSlide);
-
-    // Iniciar carrossel
-    fetchSlides();
+    // Inicialização
+    createIndicators();
+    resetTimeAnimation();
+    runNextAuto = setTimeout(() => showSlider('next'), timeAutoNext);
   </script>
 </body>
 </html>
