@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carrossel + Login</title>
+  <style>
+    body { background:#000; color:#fff; font-family:sans-serif; }
+    header { padding: 10px 20px; display:flex; justify-content:space-between; align-items:center; }
+    button { cursor:pointer; background:#14ff72cb; border:none; color:#000; padding:8px 12px; border-radius:5px; }
+    #loginModal {
+      display:none;
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.8);
+      justify-content:center; align-items:center;
+      z-index:1000;
+    }
+    #loginModal .modal-content {
+      background:#111; padding:20px; border-radius:8px;
+      max-width:320px; width:90%;
+      text-align:center;
+    }
+    input { width:100%; margin:8px 0; padding:10px; border-radius:5px; border:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Carrossel</h1>
+    <button onclick="openLogin()">Login</button>
+  </header>
+
+  <!-- Modal Login -->
+  <div id="loginModal">
+    <div class="modal-content">
+      <h2>Login</h2>
+      <input id="email" type="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Senha" />
+      <button onclick="login()">Entrar</button>
+      <button onclick="closeLogin()" style="margin-top:10px;">Cancelar</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+  <script>
+    // Config Firebase - substitua pelos seus dados
+    const firebaseConfig = {
+      apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
+      authDomain: "suasalacravinhos.firebaseapp.com",
+      projectId: "suasalacravinhos",
+      storageBucket: "suasalacravinhos.appspot.com",
+      messagingSenderId: "689313544330",
+      appId: "1:689313544330:web:1c81b55119732be02a9573",
+      measurementId: "G-5JW5YJRQ01"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    function openLogin() {
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+    function closeLogin() {
+      document.getElementById('loginModal').style.display = 'none';
+    }
+    function login() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      firebase.auth().signInWithEmailAndPassword(email, password)
+      .then(() => {
+        window.location.href = 'crud.html';
+      })
+      .catch(err => alert('Erro: ' + err.message));
+    }
+  </script>
+</body>
+</html>
