@@ -1,536 +1,245 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Reservas de Sala Comercial</title>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Slider | Sua Sala Cravinhos</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap");
 
-  <!-- Firebase Compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+      * {
+        margin: 0px;
+        padding: 0px;
+        box-sizing: border-box;
+        font-family: "Jost", sans-serif;
+      }
+      body {
+        position: relative;
+      }
+      .login-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+      .login-btn:hover {
+        background-color: #45a049;
+        transform: scale(1.05);
+      }
+      .slider-container {
+        width: 100%;
+        height: 100vh;
+        background-color: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .slider-images {
+        display: flex;
+        align-items: center;
+        gap: 21px;
+      }
+      .slider-images img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 6px;
+      }
+      .slider-img {
+        width: 110px;
+        border-radius: 6px;
+        cursor: pointer;
+        position: relative;
+        transition: 0.7s ease;
+        overflow: hidden;
+      }
+      .slider-images .slider-img:first-child,
+      .slider-images .slider-img:last-child {
+        height: 480px;
+      }
+      .slider-images .slider-img:nth-child(2),
+      .slider-images .slider-img:nth-child(6) {
+        height: 560px;
+      }
+      .slider-images .slider-img:nth-child(3),
+      .slider-images .slider-img:nth-child(4),
+      .slider-images .slider-img:nth-child(5) {
+        height: 665px;
+      }
+      h1 {
+        font-family: "Jost", sans-serif;
+        font-size: 40px;
+        font-weight: 700;
+        text-align: left;
+        text-transform: uppercase;
+        color: #fff;
+        position: absolute;
+        top: 50%;
+        left: -10%;
+        transform: rotate(270deg);
+        transition: 0.7s ease;
+      }
+      .details {
+        position: absolute;
+        bottom: 43px;
+        left: 43px;
+      }
+      .details h2 {
+        font-family: "Jost", sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        text-align: left;
+        line-height: 44px;
+        text-align: left;
+        color: #fff;
+        text-transform: uppercase;
+        transition: 0.7s ease;
+        display: none;
+      }
+      .details p {
+        font-family: "Jost", sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: left;
+        line-height: 33px;
+        text-align: left;
+        color: #fff;
+        text-transform: uppercase;
+        transition: 0.7s ease;
+        display: none;
+      }
+      .slider-img.active {
+        width: 766px !important;
+        height: 750px !important;
+      }
+      .slider-img.active h1 {
+        display: none;
+      }
+      .slider-img.active .details p,
+      .slider-img.active .details h2 {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="login-btn">Logout</button>
 
-  <!-- FullCalendar -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-
-  <style>
-    /* Reset e básico */
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #f4f4f4; }
-    header { background: #222; color: white; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; font-size: 1.5rem; }
-    header button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
-
-    /* Slider 3D vertical automático */
-    .slider-container {
-      width: 350px;
-      height: 600px;
-      margin: 1rem auto;
-      perspective: 1500px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .slider {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      transition: transform 0.7s ease;
-    }
-
-    .slider img {
-      width: 100%;
-      height: 600px;
-      object-fit: cover;
-      flex-shrink: 0;
-      border-radius: 10px;
-      pointer-events: none;
-      user-select: none;
-    }
-
-    #prev, #next {
-      display: none;
-    }
-
-    /* Conteúdo central */
-    main {
-      max-width: 900px;
-      margin: 1rem auto;
-      background: white;
-      border-radius: 10px;
-      padding: 1rem;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-
-    /* Formulário reserva */
-    label {
-      display: block;
-      margin: 0.5rem 0 0.2rem;
-      font-weight: bold;
-    }
-    input, button, select {
-      width: 100%;
-      padding: 0.5rem;
-      font-size: 1rem;
-      margin-bottom: 0.8rem;
-      border: 1px solid #aaa;
-      border-radius: 5px;
-    }
-    button {
-      background: #222;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover { background: #444; }
-
-    ul#lista {
-      list-style: none;
-      padding: 0;
-    }
-    ul#lista li {
-      background: #eee;
-      padding: 0.7rem;
-      border-radius: 5px;
-      margin-bottom: 0.4rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.95rem;
-    }
-    ul#lista li button {
-      background: transparent;
-      color: #900;
-      border: none;
-      font-size: 1.2rem;
-      cursor: pointer;
-      margin-left: 0.5rem;
-      padding: 0;
-    }
-
-    /* Calendário */
-    #calendar {
-      max-width: 900px;
-      margin: 1rem auto 3rem;
-      background: white;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.1);
-    }
-
-    /* Login Modal */
-    #modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    #modal.active { display: flex; }
-    #modal-content {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      width: 320px;
-      max-width: 90%;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      position: relative;
-    }
-    #modal-content h2 { margin-top: 0; }
-    #modal-content input {
-      width: 100%;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      font-size: 1rem;
-    }
-    #modal-content button {
-      width: 48%;
-      margin-right: 4%;
-    }
-    #modal-content button:last-child {
-      margin-right: 0;
-      background: #666;
-    }
-    #modal-close {
-      position: absolute;
-      top: 8px; right: 12px;
-      font-weight: bold;
-      font-size: 1.4rem;
-      cursor: pointer;
-      color: #444;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <h1>Reserva de Sala Comercial</h1>
-    <button id="btn-login">Login / Cadastro</button>
-  </header>
-
-  <!-- Slider 3D vertical automático -->
-  <section class="slider-container" aria-label="Galeria de imagens">
-    <div class="slider" id="slider">
-      <img src="https://i.postimg.cc/gj1cNkx0/Whats-App-Image-2025-07-03-at-16-44-10.jpg" alt="Imagem 1" />
-      <img src="https://i.postimg.cc/Pf7qtKSk/Whats-App-Image-2025-07-03-at-16-44-10-1.jpg" alt="Imagem 2" />
-      <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="Imagem 3" />
-      <img src="https://i.postimg.cc/FRWHkxm3/Whats-App-Image-2025-07-03-at-16-44-10-3.jpg" alt="Imagem 4" />
-      <img src="https://i.postimg.cc/85PCCY8T/Whats-App-Image-2025-07-03-at-16-44-11.jpg" alt="Imagem 5" />
-      <img src="https://i.postimg.cc/pdBTRH60/Whats-App-Image-2025-07-03-at-16-44-23.jpg" alt="Imagem 6" />
-      <img src="https://i.postimg.cc/j2DdHJd9/Whats-App-Image-2025-07-03-at-16-44-23-1.jpg" alt="Imagem 7" />
-      <img src="https://i.postimg.cc/jjT5p5Zw/Whats-App-Image-2025-07-03-at-16-44-24.jpg" alt="Imagem 8" />
-      <img src="https://i.postimg.cc/RZKhpfQx/Whats-App-Image-2025-07-03-at-16-44-24-1.jpg" alt="Imagem 9" />
-    </div>
-  </section>
-
-  <main>
-
-    <section id="user-info" style="display:none;">
-      <p>Logado como: <span id="user-email"></span> <button id="btn-logout">Sair</button></p>
-    </section>
-
-    <section id="reserva-section" style="display:none;">
-      <h2>Faça uma reserva</h2>
-      <label for="sala">Sala</label>
-      <input type="text" id="sala" placeholder="Nome da sala (ex: Sala 101)" />
-
-      <label for="data">Data</label>
-      <input type="date" id="data" />
-
-      <label for="horaInicio">Hora Início</label>
-      <input type="time" id="horaInicio" />
-
-      <label for="horaFim">Hora Fim</label>
-      <input type="time" id="horaFim" />
-
-      <button id="btn-reservar">Reservar</button>
-
-      <h3>Minhas reservas:</h3>
-      <ul id="lista"></ul>
-    </section>
-
-    <section id="calendar-section" style="display:none;">
-      <h2>Calendário de Reservas</h2>
-      <div id="calendar"></div>
-    </section>
-
-  </main>
-
-  <!-- Modal Login -->
-  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div id="modal-content">
-      <span id="modal-close" title="Fechar">&times;</span>
-      <h2 id="modal-title">Login / Cadastro</h2>
-      <input type="email" id="email" placeholder="Email" />
-      <input type="password" id="senha" placeholder="Senha" />
-      <div style="display:flex; justify-content: space-between;">
-        <button id="btn-login-modal">Entrar</button>
-        <button id="btn-cadastro-modal">Cadastrar</button>
+    <section class="slider-container">
+      <div class="slider-images">
+        <div class="slider-img">
+          <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="1" />
+          <h1>Mike</h1>
+          <div class="details">
+            <h2>Mike</h2>
+            <p>web3 Developer</p>
+          </div>
+        </div>
+        <div class="slider-img">
+          <img src="https://i.postimg.cc/FRWHkxm3/Whats-App-Image-2025-07-03-at-16-44-10-3.jpg" alt="2" />
+          <h1>samite</h1>
+          <div class="details">
+            <h2>samite</h2>
+            <p>wordpress Developer</p>
+          </div>
+        </div>
+        <div class="slider-img">
+          <img src="https://i.postimg.cc/85PCCY8T/Whats-App-Image-2025-07-03-at-16-44-11.jpg" alt="3" />
+          <h1>hashi</h1>
+          <div class="details">
+            <h2>hashi</h2>
+            <p>java Developer</p>
+          </div>
+        </div>
+        <div class="slider-img active">
+          <img src="https://i.postimg.cc/pdBTRH60/Whats-App-Image-2025-07-03-at-16-44-23.jpg" alt="4" />
+          <h1>kaity</h1>
+          <div class="details">
+            <h2>kaity</h2>
+            <p>web Developer</p>
+          </div>
+        </div>
+        <div class="slider-img">
+          <img src="https://i.postimg.cc/j2DdHJd9/Whats-App-Image-2025-07-03-at-16-44-23-1.jpg" alt="5" />
+          <h1>lauren</h1>
+          <div class="details">
+            <h2>lauren</h2>
+            <p>php Developer</p>
+          </div>
+        </div>
+        <div class="slider-img">
+          <img src="https://i.postimg.cc/jjT5p5Zw/Whats-App-Image-2025-07-03-at-16-44-24.jpg" alt="6" />
+          <h1>ryan</h1>
+          <div class="details">
+            <h2>ryan</h2>
+            <p>seo Developer</p>
+          </div>
+        </div>
+        <div class="slider-img">
+          <img src="https://i.postimg.cc/RZKhpfQx/Whats-App-Image-2025-07-03-at-16-44-24-1.jpg" alt="7" />
+          <h1>dakes</h1>
+          <div class="details">
+            <h2>dakes</h2>
+            <p>sql Developer</p>
+          </div>
+        </div>
       </div>
-      <p id="msg-error" style="color:red; font-weight:bold;"></p>
-    </div>
-  </div>
-
-  <script>
-    // Seu firebaseConfig (compat)
-    const firebaseConfig = {
-      apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
-      authDomain: "suasalacravinhos.firebaseapp.com",
-      projectId: "suasalacravinhos",
-      storageBucket: "suasalacravinhos.appspot.com",
-      messagingSenderId: "689313544330",
-      appId: "1:689313544330:web:1c81b55119732be02a9573",
-      measurementId: "G-5JW5YJRQ01"
-    };
-
-    // Inicializa Firebase
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // ======== SLIDER VERTICAL AUTOMÁTICO ========
-    const slider = document.getElementById("slider");
-    const total = slider.children.length;
-    let index = 0;
-
-    function showSlide(n) {
-      index = (n + total) % total;
-      slider.style.transform = `translateY(-${index * 600}px)`;
-    }
-
-    showSlide(0);
-    setInterval(() => {
-      showSlide(index + 1);
-    }, 8000);
-
-    // ======== LOGIN MODAL ========
-    const modal = document.getElementById("modal");
-    const btnLogin = document.getElementById("btn-login");
-    const btnLogout = document.getElementById("btn-logout");
-    const userInfo = document.getElementById("user-info");
-    const userEmail = document.getElementById("user-email");
-    const reservaSection = document.getElementById("reserva-section");
-    const calendarSection = document.getElementById("calendar-section");
-    const msgError = document.getElementById("msg-error");
-    const modalClose = document.getElementById("modal-close");
-
-    btnLogin.onclick = () => {
-      modal.classList.add("active");
-      msgError.textContent = "";
-      document.getElementById("email").value = "";
-      document.getElementById("senha").value = "";
-    };
-    modalClose.onclick = () => modal.classList.remove("active");
-
-    // Login e Cadastro via modal
-    document.getElementById("btn-login-modal").onclick = async () => {
-      const email = document.getElementById("email").value.trim();
-      const senha = document.getElementById("senha").value.trim();
-      if (!email || !senha) {
-        msgError.textContent = "Preencha email e senha.";
-        return;
-      }
-      try {
-        await auth.signInWithEmailAndPassword(email, senha);
-        modal.classList.remove("active");
-      } catch (e) {
-        msgError.textContent = e.message;
-      }
-    };
-    document.getElementById("btn-cadastro-modal").onclick = async () => {
-      const email = document.getElementById("email").value.trim();
-      const senha = document.getElementById("senha").value.trim();
-      if (!email || !senha) {
-        msgError.textContent = "Preencha email e senha.";
-        return;
-      }
-      try {
-        await auth.createUserWithEmailAndPassword(email, senha);
-        modal.classList.remove("active");
-      } catch (e) {
-        msgError.textContent = e.message;
-      }
-    };
-
-    // Logout
-    btnLogout.onclick = () => auth.signOut();
-
-    // ======== GERENCIAMENTO DE RESERVAS ========
-    const btnReservar = document.getElementById("btn-reservar");
-    const lista = document.getElementById("lista");
-
-    let userId = null;
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        userId = user.uid;
-        userEmail.textContent = user.email;
-        userInfo.style.display = "block";
-        reservaSection.style.display = "block";
-        calendarSection.style.display = "block";
-        btnLogin.style.display = "none";
-        carregarReservas();
-        calendar.refetchEvents();
-      } else {
-        userId = null;
-        userEmail.textContent = "";
-        userInfo.style.display = "none";
-        reservaSection.style.display = "none";
-        calendarSection.style.display = "none";
-        btnLogin.style.display = "inline-block";
-        lista.innerHTML = "";
-      }
-    });
-
-    async function carregarReservas() {
-      lista.innerHTML = "";
-      const snapshot = await db.collection("reservas")
-        .where("userId", "==", userId)
-        .orderBy("data")
-        .orderBy("horaInicio")
-        .get();
-
-      snapshot.forEach(doc => {
-        const r = doc.data();
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <span><strong>${r.sala}</strong> - ${r.data} - Das ${r.horaInicio} às ${r.horaFim}</span>
-          <span>
-            <button onclick="editarReserva('${doc.id}', '${r.sala}', '${r.data}', '${r.horaInicio}', '${r.horaFim}')">✏️</button>
-            <button onclick="deletarReserva('${doc.id}')">🗑️</button>
-          </span>
-        `;
-        lista.appendChild(li);
+    </section>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      jQuery(document).ready(function ($) {
+        $(".slider-img").on("click", function () {
+          $(".slider-img").removeClass("active");
+          $(this).addClass("active");
+        });
       });
-    }
+    </script>
 
-    async function deletarReserva(id) {
-      if (confirm("Deseja realmente excluir esta reserva?")) {
-        await db.collection("reservas").doc(id).delete();
-        carregarReservas();
-        calendar.refetchEvents();
-      }
-    }
+    <!-- Firebase Integration -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+        import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
 
-    function limparFormulario() {
-      document.getElementById("sala").value = "";
-      document.getElementById("data").value = "";
-      document.getElementById("horaInicio").value = "";
-      document.getElementById("horaFim").value = "";
-      btnReservar.textContent = "Reservar";
-      btnReservar.onclick = reservarSala;
-    }
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
+            authDomain: "suasalacravinhos.firebaseapp.com",
+            projectId: "suasalacravinhos",
+            storageBucket: "suasalacravinhos.firebasestorage.app",
+            messagingSenderId: "689313544330",
+            appId: "1:689313544330:web:1c81b55119732be02a9573",
+            measurementId: "G-5JW5YJRQ01"
+        };
 
-    function editarReserva(id, sala, data, horaInicio, horaFim) {
-      document.getElementById("sala").value = sala;
-      document.getElementById("data").value = data;
-      document.getElementById("horaInicio").value = horaInicio;
-      document.getElementById("horaFim").value = horaFim;
-      btnReservar.textContent = "Salvar";
-      btnReservar.onclick = async () => {
-        await atualizarReserva(id);
-      };
-    }
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-    async function atualizarReserva(id) {
-      const sala = document.getElementById("sala").value.trim();
-      const data = document.getElementById("data").value;
-      const horaInicio = document.getElementById("horaInicio").value;
-      const horaFim = document.getElementById("horaFim").value;
-
-      if (!sala || !data || !horaInicio || !horaFim) {
-        alert("Preencha todos os campos.");
-        return;
-      }
-      if (horaFim <= horaInicio) {
-        alert("Hora fim deve ser maior que hora início.");
-        return;
-      }
-
-      // Verifica conflitos (ignorando o documento atual)
-      const snapshot = await db.collection("reservas")
-        .where("sala", "==", sala)
-        .where("data", "==", data)
-        .get();
-
-      const conflito = snapshot.docs.find(doc => {
-        if(doc.id === id) return false;
-        const r = doc.data();
-        return (horaInicio < r.horaFim && horaFim > r.horaInicio);
-      });
-
-      if (conflito) {
-        alert("Já existe reserva nesse intervalo.");
-        return;
-      }
-
-      await db.collection("reservas").doc(id).update({
-        sala, data, horaInicio, horaFim
-      });
-
-      alert("Reserva atualizada!");
-      limparFormulario();
-      carregarReservas();
-      calendar.refetchEvents();
-    }
-
-    async function reservarSala() {
-      const sala = document.getElementById("sala").value.trim();
-      const data = document.getElementById("data").value;
-      const horaInicio = document.getElementById("horaInicio").value;
-      const horaFim = document.getElementById("horaFim").value;
-
-      if (!sala || !data || !horaInicio || !horaFim) {
-        alert("Preencha todos os campos!");
-        return;
-      }
-      if (horaFim <= horaInicio) {
-        alert("Hora de fim deve ser maior que hora de início.");
-        return;
-      }
-
-      // Verificar conflitos
-      const snapshot = await db.collection("reservas")
-        .where("sala", "==", sala)
-        .where("data", "==", data)
-        .get();
-
-      const conflito = snapshot.docs.find(doc => {
-        const r = doc.data();
-        return (horaInicio < r.horaFim && horaFim > r.horaInicio);
-      });
-
-      if (conflito) {
-        alert("⚠️ Já existe uma reserva nesse intervalo de horário.");
-        return;
-      }
-
-      await db.collection("reservas").add({
-        userId,
-        sala,
-        data,
-        horaInicio,
-        horaFim,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      alert("Reserva feita com sucesso!");
-      limparFormulario();
-      carregarReservas();
-      calendar.refetchEvents();
-    }
-
-    btnReservar.onclick = reservarSala;
-
-    // ======== FULLCALENDAR ========
-    let calendar;
-    document.addEventListener("DOMContentLoaded", () => {
-      const calendarEl = document.getElementById("calendar");
-
-      calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'pt-br',
-        selectable: true,
-        height: 600,
-        dateClick: async (info) => {
-          if (!userId) {
-            alert("Faça login para reservar!");
-            return;
-          }
-          const dia = info.dateStr;
-          // Buscar reservas do dia para mostrar horários ocupados
-          const snapshot = await db.collection("reservas").where("data", "==", dia).get();
-          const horariosOcupados = snapshot.docs.map(doc => {
-            const r = doc.data();
-            return `Das ${r.horaInicio} às ${r.horaFim} - ${r.sala}`;
-          });
-
-          alert(`Horários já reservados em ${dia}:\n\n${horariosOcupados.join('\n') || 'Nenhum'}`);
-        },
-        events: async (info, successCallback) => {
-          const snapshot = await db.collection("reservas")
-            .where("data", ">=", info.startStr)
-            .where("data", "<=", info.endStr)
-            .get();
-
-          const eventos = snapshot.docs.map(doc => {
-            const r = doc.data();
-            return {
-              title: `${r.sala} (${r.horaInicio}-${r.horaFim})`,
-              start: `${r.data}T${r.horaInicio}`,
-              end: `${r.data}T${r.horaFim}`
-            };
-          });
-
-          successCallback(eventos);
-        }
-      });
-
-      calendar.render();
-    });
-  </script>
-</body>
+        // Check auth state
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // User is not signed in, redirect to login
+                window.location.href = "login.html";
+            } else {
+                // Set up logout button
+                const logoutBtn = document.querySelector(".login-btn");
+                if (logoutBtn) {
+                    logoutBtn.addEventListener("click", () => {
+                        signOut(auth).then(() => {
+                            window.location.href = "login.html";
+                        });
+                    });
+                }
+            }
+        });
+    </script>
+  </body>
 </html>
