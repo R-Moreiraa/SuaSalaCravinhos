@@ -445,28 +445,31 @@
             display: block;
         }
 
-        /* Connection status indicator */
-        .connection-status {
+        /* Loading screen */
+        .loading-screen {
             position: fixed;
-            top: 10px;
-            right: 10px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f1eb 50%, #ede7dc 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-screen .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #8b7355;
+        }
+
+        .loading-screen p {
+            margin-top: 20px;
+            color: #8b7355;
             font-weight: 500;
-            z-index: 1000;
-        }
-
-        .connection-status.online {
-            background: rgba(217, 229, 214, 0.9);
-            color: #6b7c5d;
-            border: 1px solid rgba(107, 124, 93, 0.3);
-        }
-
-        .connection-status.offline {
-            background: rgba(240, 214, 214, 0.9);
-            color: #8b5555;
-            border: 1px solid rgba(139, 85, 85, 0.3);
         }
 
         /* Smooth transitions for all interactive elements */
@@ -518,232 +521,238 @@
     </style>
 </head>
 <body>
-    <!-- Connection Status Indicator -->
-    <div id="connectionStatus" class="connection-status offline">
-        <i class="fas fa-wifi"></i> Conectando...
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Carregando...</span>
+        </div>
+        <p>Verificando autenticação...</p>
     </div>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg">
+    <!-- Main Content -->
+    <div id="mainContent" style="display: none;">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Sistema de Reservas de Salas
+                </a>
+                <div class="navbar-nav ms-auto">
+                    <span class="navbar-text me-3" id="userEmail">Carregando...</span>
+                    <button class="btn btn-logout" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt me-1"></i>
+                        Sair
+                    </button>
+                </div>
+            </div>
+        </nav>
+
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-calendar-alt me-2"></i>
-                Sistema de Reservas de Salas
-            </a>
-            <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3" id="userEmail">Carregando...</span>
-                <button class="btn btn-logout" id="logoutBtn">
-                    <i class="fas fa-sign-out-alt me-1"></i>
-                    Sair
-                </button>
-            </div>
-        </div>
-    </nav>
+            <!-- Alert Container -->
+            <div id="alertContainer"></div>
 
-    <div class="container-fluid">
-        <!-- Alert Container -->
-        <div id="alertContainer"></div>
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider-pane" type="button" role="tab">
+                        <i class="fas fa-images me-2"></i>Galeria
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab">
+                        <i class="fas fa-calendar me-2"></i>Calendário
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations-pane" type="button" role="tab">
+                        <i class="fas fa-list me-2"></i>Gerenciar Reservas
+                    </button>
+                </li>
+            </ul>
 
-        <!-- Tabs Navigation -->
-        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider-pane" type="button" role="tab">
-                    <i class="fas fa-images me-2"></i>Galeria
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab">
-                    <i class="fas fa-calendar me-2"></i>Calendário
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations-pane" type="button" role="tab">
-                    <i class="fas fa-list me-2"></i>Gerenciar Reservas
-                </button>
-            </li>
-        </ul>
+            <!-- Tab Content -->
+            <div class="tab-content" id="mainTabContent">
+                <!-- Slider Tab -->
+                <div class="tab-pane fade" id="slider-pane" role="tabpanel">
+                    <section class="slider-container">
+                        <div class="slider-images">
+                            <div class="slider-img">
+                                <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="1" />
+                                <h1>Sala A</h1>
+                                <div class="details">
+                                    <h2>Sala A</h2>
+                                    <p>Reuniões Executivas</p>
+                                </div>
+                            </div>
+                            <div class="slider-img">
+                                <img src="https://i.postimg.cc/FRWHkxm3/Whats-App-Image-2025-07-03-at-16-44-10-3.jpg" alt="2" />
+                                <h1>Sala B</h1>
+                                <div class="details">
+                                    <h2>Sala B</h2>
+                                    <p>Reuniões Gerais</p>
+                                </div>
+                            </div>
+                            <div class="slider-img">
+                                <img src="https://i.postimg.cc/85PCCY8T/Whats-App-Image-2025-07-03-at-16-44-11.jpg" alt="3" />
+                                <h1>Conferência</h1>
+                                <div class="details">
+                                    <h2>Conferência</h2>
+                                    <p>Videoconferências</p>
+                                </div>
+                            </div>
+                            <div class="slider-img active">
+                                <img src="https://i.postimg.cc/pdBTRH60/Whats-App-Image-2025-07-03-at-16-44-23.jpg" alt="4" />
+                                <h1>Auditório</h1>
+                                <div class="details">
+                                    <h2>Auditório</h2>
+                                    <p>Grandes Eventos</p>
+                                </div>
+                            </div>
+                            <div class="slider-img">
+                                <img src="https://i.postimg.cc/j2DdHJd9/Whats-App-Image-2025-07-03-at-16-44-23-1.jpg" alt="5" />
+                                <h1>Treinamento</h1>
+                                <div class="details">
+                                    <h2>Treinamento</h2>
+                                    <p>Capacitações</p>
+                                </div>
+                            </div>
+                            <div class="slider-img">
+                                <img src="https://i.postimg.cc/jjT5p5Zw/Whats-App-Image-2025-07-03-at-16-44-24.jpg" alt="6" />
+                                <h1>Coworking</h1>
+                                <div class="details">
+                                    <h2>Coworking</h2>
+                                    <p>Trabalho Colaborativo</p>
+                                </div>
+                            </div>
+                            <div class="slider-img">
+                                <img src="https://i.postimg.cc/RZKhpfQx/Whats-App-Image-2025-07-03-at-16-44-24-1.jpg" alt="7" />
+                                <h1>Privativa</h1>
+                                <div class="details">
+                                    <h2>Privativa</h2>
+                                    <p>Reuniões Confidenciais</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
 
-        <!-- Tab Content -->
-        <div class="tab-content" id="mainTabContent">
-            <!-- Slider Tab -->
-            <div class="tab-pane fade" id="slider-pane" role="tabpanel">
-                <section class="slider-container">
-                    <div class="slider-images">
-                        <div class="slider-img">
-                            <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="1" />
-                            <h1>Sala A</h1>
-                            <div class="details">
-                                <h2>Sala A</h2>
-                                <p>Reuniões Executivas</p>
-                            </div>
-                        </div>
-                        <div class="slider-img">
-                            <img src="https://i.postimg.cc/FRWHkxm3/Whats-App-Image-2025-07-03-at-16-44-10-3.jpg" alt="2" />
-                            <h1>Sala B</h1>
-                            <div class="details">
-                                <h2>Sala B</h2>
-                                <p>Reuniões Gerais</p>
-                            </div>
-                        </div>
-                        <div class="slider-img">
-                            <img src="https://i.postimg.cc/85PCCY8T/Whats-App-Image-2025-07-03-at-16-44-11.jpg" alt="3" />
-                            <h1>Conferência</h1>
-                            <div class="details">
-                                <h2>Conferência</h2>
-                                <p>Videoconferências</p>
-                            </div>
-                        </div>
-                        <div class="slider-img active">
-                            <img src="https://i.postimg.cc/pdBTRH60/Whats-App-Image-2025-07-03-at-16-44-23.jpg" alt="4" />
-                            <h1>Auditório</h1>
-                            <div class="details">
-                                <h2>Auditório</h2>
-                                <p>Grandes Eventos</p>
-                            </div>
-                        </div>
-                        <div class="slider-img">
-                            <img src="https://i.postimg.cc/j2DdHJd9/Whats-App-Image-2025-07-03-at-16-44-23-1.jpg" alt="5" />
-                            <h1>Treinamento</h1>
-                            <div class="details">
-                                <h2>Treinamento</h2>
-                                <p>Capacitações</p>
-                            </div>
-                        </div>
-                        <div class="slider-img">
-                            <img src="https://i.postimg.cc/jjT5p5Zw/Whats-App-Image-2025-07-03-at-16-44-24.jpg" alt="6" />
-                            <h1>Coworking</h1>
-                            <div class="details">
-                                <h2>Coworking</h2>
-                                <p>Trabalho Colaborativo</p>
-                            </div>
-                        </div>
-                        <div class="slider-img">
-                            <img src="https://i.postimg.cc/RZKhpfQx/Whats-App-Image-2025-07-03-at-16-44-24-1.jpg" alt="7" />
-                            <h1>Privativa</h1>
-                            <div class="details">
-                                <h2>Privativa</h2>
-                                <p>Reuniões Confidenciais</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Calendar Tab -->
-            <div class="tab-pane fade show active" id="calendar-pane" role="tabpanel">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="mb-0">
-                                    <i class="fas fa-calendar-alt me-2"></i>
-                                    Calendário de Reservas
-                                </h4>
-                            </div>
-                            <div class="card-body">
-                                <div id="calendar"></div>
+                <!-- Calendar Tab -->
+                <div class="tab-pane fade show active" id="calendar-pane" role="tabpanel">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="mb-0">
+                                        <i class="fas fa-calendar-alt me-2"></i>
+                                        Calendário de Reservas
+                                    </h4>
+                                </div>
+                                <div class="card-body">
+                                    <div id="calendar"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Reservations Management Tab -->
-            <div class="tab-pane fade" id="reservations-pane" role="tabpanel">
-                <div class="row">
-                    <!-- Add Reservation Form -->
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-plus me-2"></i>
-                                    Nova Reserva
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <form id="reservationForm">
-                                    <div class="mb-3">
-                                        <label for="clientName" class="form-label">Nome do Cliente</label>
-                                        <input type="text" class="form-control" id="clientName" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="roomName" class="form-label">Sala</label>
-                                        <select class="form-select" id="roomName" required>
-                                            <option value="">Selecione uma sala</option>
-                                            <option value="Sala de Reunião A">Sala de Reunião A</option>
-                                            <option value="Sala de Reunião B">Sala de Reunião B</option>
-                                            <option value="Sala de Conferência">Sala de Conferência</option>
-                                            <option value="Auditório">Auditório</option>
-                                            <option value="Sala de Treinamento">Sala de Treinamento</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="reservationDate" class="form-label">Data</label>
-                                        <input type="date" class="form-control" id="reservationDate" required>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <label for="startTime" class="form-label">Hora Início</label>
-                                            <input type="time" class="form-control" id="startTime" required>
+                <!-- Reservations Management Tab -->
+                <div class="tab-pane fade" id="reservations-pane" role="tabpanel">
+                    <div class="row">
+                        <!-- Add Reservation Form -->
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Nova Reserva
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="reservationForm">
+                                        <div class="mb-3">
+                                            <label for="clientName" class="form-label">Nome do Cliente</label>
+                                            <input type="text" class="form-control" id="clientName" required>
                                         </div>
-                                        <div class="col-6">
-                                            <label for="endTime" class="form-label">Hora Fim</label>
-                                            <input type="time" class="form-control" id="endTime" required>
+                                        <div class="mb-3">
+                                            <label for="roomName" class="form-label">Sala</label>
+                                            <select class="form-select" id="roomName" required>
+                                                <option value="">Selecione uma sala</option>
+                                                <option value="Sala de Reunião A">Sala de Reunião A</option>
+                                                <option value="Sala de Reunião B">Sala de Reunião B</option>
+                                                <option value="Sala de Conferência">Sala de Conferência</option>
+                                                <option value="Auditório">Auditório</option>
+                                                <option value="Sala de Treinamento">Sala de Treinamento</option>
+                                            </select>
                                         </div>
-                                    </div>
-                                    <div class="mb-3 mt-3">
-                                        <label for="scheduledBy" class="form-label">Agendado por</label>
-                                        <input type="text" class="form-control" id="scheduledBy" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="description" class="form-label">Descrição (opcional)</label>
-                                        <textarea class="form-control" id="description" rows="3"></textarea>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-save me-2"></i>
-                                        Salvar Reserva
-                                    </button>
-                                </form>
+                                        <div class="mb-3">
+                                            <label for="reservationDate" class="form-label">Data</label>
+                                            <input type="date" class="form-control" id="reservationDate" required>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="startTime" class="form-label">Hora Início</label>
+                                                <input type="time" class="form-control" id="startTime" required>
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="endTime" class="form-label">Hora Fim</label>
+                                                <input type="time" class="form-control" id="endTime" required>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3 mt-3">
+                                            <label for="scheduledBy" class="form-label">Agendado por</label>
+                                            <input type="text" class="form-control" id="scheduledBy" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Descrição (opcional)</label>
+                                            <textarea class="form-control" id="description" rows="3"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary w-100">
+                                            <i class="fas fa-save me-2"></i>
+                                            Salvar Reserva
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Reservations List -->
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-list me-2"></i>
-                                    Lista de Reservas
-                                </h5>
-                                <button class="btn btn-success" onclick="loadReservations()">
-                                    <i class="fas fa-sync-alt me-1"></i>
-                                    Atualizar
-                                </button>
-                            </div>
-                            <div class="card-body">
-                                <div class="loading" id="loadingReservations">
-                                    <div class="spinner-border" role="status">
-                                        <span class="visually-hidden">Carregando...</span>
-                                    </div>
-                                    <p class="mt-2">Carregando reservas...</p>
+                        <!-- Reservations List -->
+                        <div class="col-md-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-list me-2"></i>
+                                        Lista de Reservas
+                                    </h5>
+                                    <button class="btn btn-success" onclick="loadReservations()">
+                                        <i class="fas fa-sync-alt me-1"></i>
+                                        Atualizar
+                                    </button>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Cliente</th>
-                                                <th>Sala</th>
-                                                <th>Data</th>
-                                                <th>Horário</th>
-                                                <th>Agendado por</th>
-                                                <th>Ações</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="reservationsTableBody">
-                                            <!-- Reservations will be loaded here -->
-                                        </tbody>
-                                    </table>
+                                <div class="card-body">
+                                    <div class="loading" id="loadingReservations">
+                                        <div class="spinner-border" role="status">
+                                            <span class="visually-hidden">Carregando...</span>
+                                        </div>
+                                        <p class="mt-2">Carregando reservas...</p>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Cliente</th>
+                                                    <th>Sala</th>
+                                                    <th>Data</th>
+                                                    <th>Horário</th>
+                                                    <th>Agendado por</th>
+                                                    <th>Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="reservationsTableBody">
+                                                <!-- Reservations will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -831,7 +840,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -851,69 +860,41 @@
         let calendar;
         let currentUser = null;
         let reservationsData = new Map();
-        let isFirebaseConnected = false;
 
-        // Initialize Firebase with error handling
-        async function initializeFirebase() {
-            try {
-                app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-                
-                // Test connection
-                await testFirebaseConnection();
-                
-                updateConnectionStatus(true);
-                isFirebaseConnected = true;
-                
-                // Check authentication state
-                onAuthStateChanged(auth, (user) => {
-                    if (!user) {
-                        // For demo purposes, create a mock user
-                        currentUser = { email: "demo@suasalacravinhos.com" };
-                        document.getElementById('userEmail').textContent = currentUser.email;
-                        initializeReservationApp();
-                    } else {
-                        currentUser = user;
-                        document.getElementById('userEmail').textContent = user.email;
-                        initializeReservationApp();
-                    }
-                });
-                
-            } catch (error) {
-                console.error("Erro ao inicializar Firebase:", error);
-                updateConnectionStatus(false);
-                showAlert('Erro de conexão com o servidor. Funcionando em modo offline.', 'warning');
-                
-                // Initialize in offline mode
-                currentUser = { email: "demo@suasalacravinhos.com" };
-                document.getElementById('userEmail').textContent = currentUser.email;
-                initializeReservationApp();
-            }
+        // Initialize Firebase
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (error) {
+            console.error("Erro ao inicializar Firebase:", error);
+            showAlert('Erro de conexão. Redirecionando para login...', 'danger');
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 2000);
         }
 
-        // Test Firebase connection
-        async function testFirebaseConnection() {
-            try {
-                const testQuery = query(collection(db, "reservations"));
-                await getDocs(testQuery);
-                return true;
-            } catch (error) {
-                throw new Error("Falha na conexão com Firebase");
-            }
-        }
-
-        // Update connection status indicator
-        function updateConnectionStatus(isOnline) {
-            const statusEl = document.getElementById('connectionStatus');
-            if (isOnline) {
-                statusEl.className = 'connection-status online';
-                statusEl.innerHTML = '<i class="fas fa-wifi"></i> Online';
+        // Check authentication state
+        onAuthStateChanged(auth, (user) => {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const mainContent = document.getElementById('mainContent');
+            
+            if (user) {
+                // User is signed in
+                currentUser = user;
+                document.getElementById('userEmail').textContent = user.email;
+                
+                // Hide loading screen and show main content
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                
+                // Initialize the application
+                initializeApp();
             } else {
-                statusEl.className = 'connection-status offline';
-                statusEl.innerHTML = '<i class="fas fa-wifi"></i> Offline';
+                // User is not signed in, redirect to login
+                window.location.href = "login.html";
             }
-        }
+        });
 
         // Show alert messages
         function showAlert(message, type = 'info') {
@@ -940,7 +921,7 @@
         }
 
         // Initialize the application
-        function initializeReservationApp() {
+        function initializeApp() {
             initializeCalendar();
             loadReservations();
             setupEventListeners();
@@ -949,22 +930,10 @@
 
         // Initialize Slider
         function initializeSlider() {
-            if (typeof $ !== 'undefined') {
-                $(".slider-img").off("click").on("click", function () {
-                    $(".slider-img").removeClass("active");
-                    $(this).addClass("active");
-                });
-            } else {
-                document.addEventListener('DOMContentLoaded', function() {
-                    const sliderImages = document.querySelectorAll('.slider-img');
-                    sliderImages.forEach(img => {
-                        img.addEventListener('click', function() {
-                            sliderImages.forEach(i => i.classList.remove('active'));
-                            this.classList.add('active');
-                        });
-                    });
-                });
-            }
+            $(".slider-img").off("click").on("click", function () {
+                $(".slider-img").removeClass("active");
+                $(this).addClass("active");
+            });
         }
 
         // Initialize FullCalendar
@@ -996,16 +965,14 @@
         // Setup event listeners
         function setupEventListeners() {
             // Logout button
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                if (isFirebaseConnected && auth) {
-                    signOut(auth).then(() => {
-                        window.location.href = "login.html";
-                    }).catch((error) => {
-                        console.error("Erro ao fazer logout:", error);
-                        showAlert('Erro ao fazer logout. Tente novamente.', 'danger');
-                    });
-                } else {
+            document.getElementById('logoutBtn').addEventListener('click', async () => {
+                try {
+                    await signOut(auth);
                     showAlert('Logout realizado com sucesso!', 'success');
+                    window.location.href = "login.html";
+                } catch (error) {
+                    console.error("Erro ao fazer logout:", error);
+                    showAlert('Erro ao fazer logout. Tente novamente.', 'danger');
                 }
             });
 
@@ -1047,16 +1014,8 @@
             }
 
             try {
-                if (isFirebaseConnected) {
-                    const docRef = await addDoc(collection(db, "reservations"), formData);
-                    showAlert('Reserva criada com sucesso!', 'success');
-                } else {
-                    // Offline mode - store locally
-                    const localId = 'local-' + Date.now();
-                    reservationsData.set(localId, formData);
-                    showAlert('Reserva criada localmente. Será sincronizada quando a conexão for restabelecida.', 'warning');
-                }
-                
+                const docRef = await addDoc(collection(db, "reservations"), formData);
+                showAlert('Reserva criada com sucesso!', 'success');
                 document.getElementById('reservationForm').reset();
                 await loadReservations();
                 await loadCalendarEvents();
@@ -1075,71 +1034,22 @@
             tableBody.innerHTML = '';
 
             try {
-                if (isFirebaseConnected) {
-                    reservationsData.clear();
-                    const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
-                    const querySnapshot = await getDocs(q);
-                    
-                    querySnapshot.forEach((doc) => {
-                        const reservation = doc.data();
-                        reservationsData.set(doc.id, reservation);
-                        const row = createReservationRow(doc.id, reservation);
-                        tableBody.appendChild(row);
-                    });
-                } else {
-                    // Load from local storage or show demo data
-                    if (reservationsData.size === 0) {
-                        // Add demo data
-                        reservationsData.set('demo-1', {
-                            clientName: 'João Silva',
-                            roomName: 'Sala de Reunião A',
-                            reservationDate: '2025-07-15',
-                            startTime: '09:00',
-                            endTime: '10:00',
-                            scheduledBy: 'Maria Santos',
-                            description: 'Reunião de planejamento'
-                        });
-                        
-                        reservationsData.set('demo-2', {
-                            clientName: 'Ana Costa',
-                            roomName: 'Auditório',
-                            reservationDate: '2025-07-16',
-                            startTime: '14:00',
-                            endTime: '16:00',
-                            scheduledBy: 'Carlos Lima',
-                            description: 'Apresentação de resultados'
-                        });
-                    }
-                    
-                    reservationsData.forEach((reservation, id) => {
-                        const row = createReservationRow(id, reservation);
-                        tableBody.appendChild(row);
-                    });
-                }
+                reservationsData.clear();
+                const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((doc) => {
+                    const reservation = doc.data();
+                    reservationsData.set(doc.id, reservation);
+                    const row = createReservationRow(doc.id, reservation);
+                    tableBody.appendChild(row);
+                });
 
                 await loadCalendarEvents();
                 
             } catch (error) {
                 console.error("Erro ao carregar reservas:", error);
                 showAlert('Erro ao carregar reservas. Verifique sua conexão com a internet.', 'danger');
-                
-                // Try to load demo data as fallback
-                if (reservationsData.size === 0) {
-                    reservationsData.set('demo-1', {
-                        clientName: 'João Silva',
-                        roomName: 'Sala de Reunião A',
-                        reservationDate: '2025-07-15',
-                        startTime: '09:00',
-                        endTime: '10:00',
-                        scheduledBy: 'Maria Santos',
-                        description: 'Reunião de planejamento'
-                    });
-                    
-                    reservationsData.forEach((reservation, id) => {
-                        const row = createReservationRow(id, reservation);
-                        tableBody.appendChild(row);
-                    });
-                }
             } finally {
                 loadingEl.style.display = 'none';
             }
@@ -1227,7 +1137,7 @@ Descrição: ${props.description}
             try {
                 let reservationData = reservationsData.get(id);
                 
-                if (!reservationData && isFirebaseConnected) {
+                if (!reservationData) {
                     const docRef = doc(db, "reservations", id);
                     const docSnap = await getDoc(docRef);
                     
@@ -1238,11 +1148,6 @@ Descrição: ${props.description}
                         showAlert('Reserva não encontrada.', 'danger');
                         return;
                     }
-                }
-
-                if (!reservationData) {
-                    showAlert('Reserva não encontrada.', 'danger');
-                    return;
                 }
 
                 // Preencher o formulário de edição
@@ -1291,15 +1196,9 @@ Descrição: ${props.description}
             }
 
             try {
-                if (isFirebaseConnected) {
-                    const docRef = doc(db, "reservations", id);
-                    await updateDoc(docRef, formData);
-                    showAlert('Reserva atualizada com sucesso!', 'success');
-                } else {
-                    // Update locally
-                    reservationsData.set(id, { ...reservationsData.get(id), ...formData });
-                    showAlert('Reserva atualizada localmente. Será sincronizada quando a conexão for restabelecida.', 'warning');
-                }
+                const docRef = doc(db, "reservations", id);
+                await updateDoc(docRef, formData);
+                showAlert('Reserva atualizada com sucesso!', 'success');
                 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editReservationModal'));
                 modal.hide();
@@ -1312,19 +1211,19 @@ Descrição: ${props.description}
             }
         };
 
-        // Delete reservation
+        // Delete reservation - CORRIGIDO
         window.deleteReservation = async function(id) {
             if (confirm('Tem certeza que deseja excluir esta reserva?')) {
                 try {
-                    if (isFirebaseConnected) {
-                        await deleteDoc(doc(db, "reservations", id));
-                        showAlert('Reserva excluída com sucesso!', 'success');
-                    } else {
-                        // Delete locally
-                        reservationsData.delete(id);
-                        showAlert('Reserva excluída localmente.', 'warning');
-                    }
+                    // Delete from Firestore
+                    await deleteDoc(doc(db, "reservations", id));
                     
+                    // Remove from local cache
+                    reservationsData.delete(id);
+                    
+                    showAlert('Reserva excluída com sucesso!', 'success');
+                    
+                    // Reload reservations and calendar
                     await loadReservations();
                     await loadCalendarEvents();
                 } catch (error) {
@@ -1336,9 +1235,6 @@ Descrição: ${props.description}
 
         // Make loadReservations available globally
         window.loadReservations = loadReservations;
-
-        // Initialize Firebase when page loads
-        initializeFirebase();
     </script>
 </body>
 </html>
