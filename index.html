@@ -630,12 +630,12 @@
             } else {
                 currentUser = user;
                 document.getElementById('userEmail').textContent = user.email;
-                initializeApp();
+                initializeReservationApp();
             }
         });
 
         // Initialize the application
-        function initializeApp() {
+        function initializeReservationApp() {
             initializeCalendar();
             loadReservations();
             setupEventListeners();
@@ -644,12 +644,24 @@
 
         // Initialize Slider
         function initializeSlider() {
-            $(document).ready(function () {
-                $(".slider-img").on("click", function () {
+            // Aguarda o jQuery estar carregado
+            if (typeof $ !== 'undefined') {
+                $(".slider-img").off("click").on("click", function () {
                     $(".slider-img").removeClass("active");
                     $(this).addClass("active");
                 });
-            });
+            } else {
+                // Fallback para JavaScript puro se jQuery não estiver disponível
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sliderImages = document.querySelectorAll('.slider-img');
+                    sliderImages.forEach(img => {
+                        img.addEventListener('click', function() {
+                            sliderImages.forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                        });
+                    });
+                });
+            }
         }
 
         // Initialize FullCalendar
