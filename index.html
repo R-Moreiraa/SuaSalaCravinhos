@@ -1,214 +1,609 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Image Slider | Sua Sala Cravinhos</title>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reservas de Salas | Sua Sala Cravinhos</title>
+    
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap");
 
-      * {
-        margin: 0px;
-        padding: 0px;
-        box-sizing: border-box;
-        font-family: "Jost", sans-serif;
-      }
-      body {
-        position: relative;
-      }
-      .login-btn {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        padding: 10px 20px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 16px;
-        cursor: pointer;
-        z-index: 1000;
-        transition: all 0.3s ease;
-      }
-      .login-btn:hover {
-        background-color: #45a049;
-        transform: scale(1.05);
-      }
-      .slider-container {
-        width: 100%;
-        height: 100vh;
-        background-color: #000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .slider-images {
-        display: flex;
-        align-items: center;
-        gap: 21px;
-      }
-      .slider-images img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 6px;
-      }
-      .slider-img {
-        width: 110px;
-        border-radius: 6px;
-        cursor: pointer;
-        position: relative;
-        transition: 0.7s ease;
-        overflow: hidden;
-      }
-      .slider-images .slider-img:first-child,
-      .slider-images .slider-img:last-child {
-        height: 480px;
-      }
-      .slider-images .slider-img:nth-child(2),
-      .slider-images .slider-img:nth-child(6) {
-        height: 560px;
-      }
-      .slider-images .slider-img:nth-child(3),
-      .slider-images .slider-img:nth-child(4),
-      .slider-images .slider-img:nth-child(5) {
-        height: 665px;
-      }
-      h1 {
-        font-family: "Jost", sans-serif;
-        font-size: 40px;
-        font-weight: 700;
-        text-align: left;
-        text-transform: uppercase;
-        color: #fff;
-        position: absolute;
-        top: 50%;
-        left: -10%;
-        transform: rotate(270deg);
-        transition: 0.7s ease;
-      }
-      .details {
-        position: absolute;
-        bottom: 43px;
-        left: 43px;
-      }
-      .details h2 {
-        font-family: "Jost", sans-serif;
-        font-size: 26px;
-        font-weight: 700;
-        text-align: left;
-        line-height: 44px;
-        text-align: left;
-        color: #fff;
-        text-transform: uppercase;
-        transition: 0.7s ease;
-        display: none;
-      }
-      .details p {
-        font-family: "Jost", sans-serif;
-        font-size: 20px;
-        font-weight: 700;
-        text-align: left;
-        line-height: 33px;
-        text-align: left;
-        color: #fff;
-        text-transform: uppercase;
-        transition: 0.7s ease;
-        display: none;
-      }
-      .slider-img.active {
-        width: 766px !important;
-        height: 750px !important;
-      }
-      .slider-img.active h1 {
-        display: none;
-      }
-      .slider-img.active .details p,
-      .slider-img.active .details h2 {
-        display: block;
-      }
+        * {
+            margin: 0px;
+            padding: 0px;
+            box-sizing: border-box;
+            font-family: "Jost", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: #333 !important;
+        }
+
+        .btn-logout {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+        }
+
+        .container-fluid {
+            padding: 20px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .card-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+
+        #calendar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .fc-event {
+            border-radius: 8px;
+            border: none;
+            padding: 2px 5px;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner-border {
+            color: #667eea;
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+
+        .nav-tabs .nav-link {
+            border-radius: 10px 10px 0 0;
+            border: none;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 0 0 15px 15px;
+            padding: 20px;
+        }
+
+        /* Slider Styles */
+        .slider-container {
+            width: 100%;
+            height: 100vh;
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-images {
+            display: flex;
+            align-items: center;
+            gap: 21px;
+        }
+
+        .slider-images img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .slider-img {
+            width: 110px;
+            border-radius: 6px;
+            cursor: pointer;
+            position: relative;
+            transition: 0.7s ease;
+            overflow: hidden;
+        }
+
+        .slider-images .slider-img:first-child,
+        .slider-images .slider-img:last-child {
+            height: 480px;
+        }
+
+        .slider-images .slider-img:nth-child(2),
+        .slider-images .slider-img:nth-child(6) {
+            height: 560px;
+        }
+
+        .slider-images .slider-img:nth-child(3),
+        .slider-images .slider-img:nth-child(4),
+        .slider-images .slider-img:nth-child(5) {
+            height: 665px;
+        }
+
+        .slider-img h1 {
+            font-family: "Jost", sans-serif;
+            font-size: 40px;
+            font-weight: 700;
+            text-align: left;
+            text-transform: uppercase;
+            color: #fff;
+            position: absolute;
+            top: 50%;
+            left: -10%;
+            transform: rotate(270deg);
+            transition: 0.7s ease;
+        }
+
+        .details {
+            position: absolute;
+            bottom: 43px;
+            left: 43px;
+        }
+
+        .details h2 {
+            font-family: "Jost", sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            text-align: left;
+            line-height: 44px;
+            text-align: left;
+            color: #fff;
+            text-transform: uppercase;
+            transition: 0.7s ease;
+            display: none;
+        }
+
+        .details p {
+            font-family: "Jost", sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            text-align: left;
+            line-height: 33px;
+            text-align: left;
+            color: #fff;
+            text-transform: uppercase;
+            transition: 0.7s ease;
+            display: none;
+        }
+
+        .slider-img.active {
+            width: 766px !important;
+            height: 750px !important;
+        }
+
+        .slider-img.active h1 {
+            display: none;
+        }
+
+        .slider-img.active .details p,
+        .slider-img.active .details h2 {
+            display: block;
+        }
     </style>
-  </head>
-  <body>
-    <button class="login-btn">Logout</button>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-calendar-alt me-2"></i>
+                Sistema de Reservas de Salas
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3" id="userEmail">Carregando...</span>
+                <button class="btn btn-logout" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt me-1"></i>
+                    Sair
+                </button>
+            </div>
+        </div>
+    </nav>
 
-    <section class="slider-container">
-      <div class="slider-images">
-        <div class="slider-img">
-          <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="1" />
-          <h1>Mike</h1>
-          <div class="details">
-            <h2>Mike</h2>
-            <p>web3 Developer</p>
-          </div>
+    <div class="container-fluid">
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider-pane" type="button" role="tab">
+                    <i class="fas fa-images me-2"></i>Galeria
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab">
+                    <i class="fas fa-calendar me-2"></i>Calendário
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations-pane" type="button" role="tab">
+                    <i class="fas fa-list me-2"></i>Gerenciar Reservas
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Slider Tab -->
+            <div class="tab-pane fade" id="slider-pane" role="tabpanel">
+                <section class="slider-container">
+                    <div class="slider-images">
+                        <div class="slider-img">
+                            <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="1" />
+                            <h1>Sala A</h1>
+                            <div class="details">
+                                <h2>Sala A</h2>
+                                <p>Reuniões Executivas</p>
+                            </div>
+                        </div>
+                        <div class="slider-img">
+                            <img src="https://i.postimg.cc/FRWHkxm3/Whats-App-Image-2025-07-03-at-16-44-10-3.jpg" alt="2" />
+                            <h1>Sala B</h1>
+                            <div class="details">
+                                <h2>Sala B</h2>
+                                <p>Reuniões Gerais</p>
+                            </div>
+                        </div>
+                        <div class="slider-img">
+                            <img src="https://i.postimg.cc/85PCCY8T/Whats-App-Image-2025-07-03-at-16-44-11.jpg" alt="3" />
+                            <h1>Conferência</h1>
+                            <div class="details">
+                                <h2>Conferência</h2>
+                                <p>Videoconferências</p>
+                            </div>
+                        </div>
+                        <div class="slider-img active">
+                            <img src="https://i.postimg.cc/pdBTRH60/Whats-App-Image-2025-07-03-at-16-44-23.jpg" alt="4" />
+                            <h1>Auditório</h1>
+                            <div class="details">
+                                <h2>Auditório</h2>
+                                <p>Grandes Eventos</p>
+                            </div>
+                        </div>
+                        <div class="slider-img">
+                            <img src="https://i.postimg.cc/j2DdHJd9/Whats-App-Image-2025-07-03-at-16-44-23-1.jpg" alt="5" />
+                            <h1>Treinamento</h1>
+                            <div class="details">
+                                <h2>Treinamento</h2>
+                                <p>Capacitações</p>
+                            </div>
+                        </div>
+                        <div class="slider-img">
+                            <img src="https://i.postimg.cc/jjT5p5Zw/Whats-App-Image-2025-07-03-at-16-44-24.jpg" alt="6" />
+                            <h1>Coworking</h1>
+                            <div class="details">
+                                <h2>Coworking</h2>
+                                <p>Trabalho Colaborativo</p>
+                            </div>
+                        </div>
+                        <div class="slider-img">
+                            <img src="https://i.postimg.cc/RZKhpfQx/Whats-App-Image-2025-07-03-at-16-44-24-1.jpg" alt="7" />
+                            <h1>Privativa</h1>
+                            <div class="details">
+                                <h2>Privativa</h2>
+                                <p>Reuniões Confidenciais</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Calendar Tab -->
+            <div class="tab-pane fade show active" id="calendar-pane" role="tabpanel">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    Calendário de Reservas
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reservations Management Tab -->
+            <div class="tab-pane fade" id="reservations-pane" role="tabpanel">
+                <div class="row">
+                    <!-- Add Reservation Form -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Nova Reserva
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="reservationForm">
+                                    <div class="mb-3">
+                                        <label for="clientName" class="form-label">Nome do Cliente</label>
+                                        <input type="text" class="form-control" id="clientName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="roomName" class="form-label">Sala</label>
+                                        <select class="form-control" id="roomName" required>
+                                            <option value="">Selecione uma sala</option>
+                                            <option value="Sala de Reunião A">Sala de Reunião A</option>
+                                            <option value="Sala de Reunião B">Sala de Reunião B</option>
+                                            <option value="Sala de Conferência">Sala de Conferência</option>
+                                            <option value="Auditório">Auditório</option>
+                                            <option value="Sala de Treinamento">Sala de Treinamento</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reservationDate" class="form-label">Data</label>
+                                        <input type="date" class="form-control" id="reservationDate" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label for="startTime" class="form-label">Hora Início</label>
+                                            <input type="time" class="form-control" id="startTime" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label for="endTime" class="form-label">Hora Fim</label>
+                                            <input type="time" class="form-control" id="endTime" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <label for="scheduledBy" class="form-label">Agendado por</label>
+                                        <input type="text" class="form-control" id="scheduledBy" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Descrição (opcional)</label>
+                                        <textarea class="form-control" id="description" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-save me-2"></i>
+                                        Salvar Reserva
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservations List -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Lista de Reservas
+                                </h5>
+                                <button class="btn btn-success" onclick="loadReservations()">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    Atualizar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="loading" id="loadingReservations">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                    <p class="mt-2">Carregando reservas...</p>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Cliente</th>
+                                                <th>Sala</th>
+                                                <th>Data</th>
+                                                <th>Horário</th>
+                                                <th>Agendado por</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reservationsTableBody">
+                                            <!-- Reservations will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="slider-img">
-          <img src="https://i.postimg.cc/FRWHkxm3/Whats-App-Image-2025-07-03-at-16-44-10-3.jpg" alt="2" />
-          <h1>samite</h1>
-          <div class="details">
-            <h2>samite</h2>
-            <p>wordpress Developer</p>
-          </div>
+    </div>
+
+    <!-- Edit Reservation Modal -->
+    <div class="modal fade" id="editReservationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Reserva
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editReservationForm">
+                        <input type="hidden" id="editReservationId">
+                        <div class="mb-3">
+                            <label for="editClientName" class="form-label">Nome do Cliente</label>
+                            <input type="text" class="form-control" id="editClientName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRoomName" class="form-label">Sala</label>
+                            <select class="form-control" id="editRoomName" required>
+                                <option value="">Selecione uma sala</option>
+                                <option value="Sala de Reunião A">Sala de Reunião A</option>
+                                <option value="Sala de Reunião B">Sala de Reunião B</option>
+                                <option value="Sala de Conferência">Sala de Conferência</option>
+                                <option value="Auditório">Auditório</option>
+                                <option value="Sala de Treinamento">Sala de Treinamento</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editReservationDate" class="form-label">Data</label>
+                            <input type="date" class="form-control" id="editReservationDate" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="editStartTime" class="form-label">Hora Início</label>
+                                <input type="time" class="form-control" id="editStartTime" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="editEndTime" class="form-label">Hora Fim</label>
+                                <input type="time" class="form-control" id="editEndTime" required>
+                            </div>
+                        </div>
+                        <div class="mb-3 mt-3">
+                            <label for="editScheduledBy" class="form-label">Agendado por</label>
+                            <input type="text" class="form-control" id="editScheduledBy" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editDescription" class="form-label">Descrição (opcional)</label>
+                            <textarea class="form-control" id="editDescription" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="updateReservation()">
+                        <i class="fas fa-save me-1"></i>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="slider-img">
-          <img src="https://i.postimg.cc/85PCCY8T/Whats-App-Image-2025-07-03-at-16-44-11.jpg" alt="3" />
-          <h1>hashi</h1>
-          <div class="details">
-            <h2>hashi</h2>
-            <p>java Developer</p>
-          </div>
-        </div>
-        <div class="slider-img active">
-          <img src="https://i.postimg.cc/pdBTRH60/Whats-App-Image-2025-07-03-at-16-44-23.jpg" alt="4" />
-          <h1>kaity</h1>
-          <div class="details">
-            <h2>kaity</h2>
-            <p>web Developer</p>
-          </div>
-        </div>
-        <div class="slider-img">
-          <img src="https://i.postimg.cc/j2DdHJd9/Whats-App-Image-2025-07-03-at-16-44-23-1.jpg" alt="5" />
-          <h1>lauren</h1>
-          <div class="details">
-            <h2>lauren</h2>
-            <p>php Developer</p>
-          </div>
-        </div>
-        <div class="slider-img">
-          <img src="https://i.postimg.cc/jjT5p5Zw/Whats-App-Image-2025-07-03-at-16-44-24.jpg" alt="6" />
-          <h1>ryan</h1>
-          <div class="details">
-            <h2>ryan</h2>
-            <p>seo Developer</p>
-          </div>
-        </div>
-        <div class="slider-img">
-          <img src="https://i.postimg.cc/RZKhpfQx/Whats-App-Image-2025-07-03-at-16-44-24-1.jpg" alt="7" />
-          <h1>dakes</h1>
-          <div class="details">
-            <h2>dakes</h2>
-            <p>sql Developer</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    </div>
+
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-      jQuery(document).ready(function ($) {
-        $(".slider-img").on("click", function () {
-          $(".slider-img").removeClass("active");
-          $(this).addClass("active");
-        });
-      });
-    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- FullCalendar JS -->
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
 
     <!-- Firebase Integration -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
+        // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
             authDomain: "suasalacravinhos.firebaseapp.com",
@@ -222,24 +617,312 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // Check auth state
+        // Global variables
+        let calendar;
+        let currentUser = null;
+
+        // Check authentication state
         onAuthStateChanged(auth, (user) => {
             if (!user) {
-                // User is not signed in, redirect to login
                 window.location.href = "login.html";
             } else {
-                // Set up logout button
-                const logoutBtn = document.querySelector(".login-btn");
-                if (logoutBtn) {
-                    logoutBtn.addEventListener("click", () => {
-                        signOut(auth).then(() => {
-                            window.location.href = "login.html";
-                        });
-                    });
-                }
+                currentUser = user;
+                document.getElementById('userEmail').textContent = user.email;
+                initializeApp();
             }
         });
+
+        // Initialize the application
+        function initializeApp() {
+            initializeCalendar();
+            loadReservations();
+            setupEventListeners();
+            initializeSlider();
+        }
+
+        // Initialize Slider
+        function initializeSlider() {
+            $(document).ready(function () {
+                $(".slider-img").on("click", function () {
+                    $(".slider-img").removeClass("active");
+                    $(this).addClass("active");
+                });
+            });
+        }
+
+        // Initialize FullCalendar
+        function initializeCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'pt-br',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                buttonText: {
+                    today: 'Hoje',
+                    month: 'Mês',
+                    week: 'Semana',
+                    day: 'Dia'
+                },
+                events: [],
+                eventClick: function(info) {
+                    showReservationDetails(info.event);
+                },
+                height: 'auto'
+            });
+            calendar.render();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                signOut(auth).then(() => {
+                    window.location.href = "login.html";
+                });
+            });
+
+            // Reservation form
+            document.getElementById('reservationForm').addEventListener('submit', addReservation);
+
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reservationDate').min = today;
+            document.getElementById('editReservationDate').min = today;
+        }
+
+        // Add new reservation
+        async function addReservation(e) {
+            e.preventDefault();
+            
+            const formData = {
+                clientName: document.getElementById('clientName').value,
+                roomName: document.getElementById('roomName').value,
+                reservationDate: document.getElementById('reservationDate').value,
+                startTime: document.getElementById('startTime').value,
+                endTime: document.getElementById('endTime').value,
+                scheduledBy: document.getElementById('scheduledBy').value,
+                description: document.getElementById('description').value,
+                createdAt: new Date(),
+                createdBy: currentUser.email
+            };
+
+            // Validate time
+            if (formData.startTime >= formData.endTime) {
+                alert('A hora de início deve ser anterior à hora de fim.');
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "reservations"), formData);
+                alert('Reserva criada com sucesso!');
+                document.getElementById('reservationForm').reset();
+                loadReservations();
+                loadCalendarEvents();
+            } catch (error) {
+                console.error("Erro ao criar reserva:", error);
+                alert('Erro ao criar reserva. Tente novamente.');
+            }
+        }
+
+        // Load reservations
+        async function loadReservations() {
+            const loadingEl = document.getElementById('loadingReservations');
+            const tableBody = document.getElementById('reservationsTableBody');
+            
+            loadingEl.style.display = 'block';
+            tableBody.innerHTML = '';
+
+            try {
+                const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((doc) => {
+                    const reservation = doc.data();
+                    const row = createReservationRow(doc.id, reservation);
+                    tableBody.appendChild(row);
+                });
+
+                loadCalendarEvents();
+            } catch (error) {
+                console.error("Erro ao carregar reservas:", error);
+                alert('Erro ao carregar reservas.');
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Create reservation table row
+        function createReservationRow(id, reservation) {
+            const row = document.createElement('tr');
+            const date = new Date(reservation.reservationDate + 'T00:00:00');
+            const formattedDate = date.toLocaleDateString('pt-BR');
+            
+            row.innerHTML = `
+                <td>${reservation.clientName}</td>
+                <td>${reservation.roomName}</td>
+                <td>${formattedDate}</td>
+                <td>${reservation.startTime} - ${reservation.endTime}</td>
+                <td>${reservation.scheduledBy}</td>
+                <td>
+                    <button class="btn btn-warning btn-sm me-1" onclick="editReservation('${id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteReservation('${id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            return row;
+        }
+
+        // Load calendar events
+        async function loadCalendarEvents() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "reservations"));
+                const events = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const reservation = doc.data();
+                    const startDateTime = `${reservation.reservationDate}T${reservation.startTime}`;
+                    const endDateTime = `${reservation.reservationDate}T${reservation.endTime}`;
+                    
+                    events.push({
+                        id: doc.id,
+                        title: `${reservation.roomName} - ${reservation.clientName}`,
+                        start: startDateTime,
+                        end: endDateTime,
+                        backgroundColor: getRandomColor(),
+                        borderColor: getRandomColor(),
+                        extendedProps: {
+                            clientName: reservation.clientName,
+                            roomName: reservation.roomName,
+                            scheduledBy: reservation.scheduledBy,
+                            description: reservation.description || 'Sem descrição'
+                        }
+                    });
+                });
+
+                calendar.removeAllEvents();
+                calendar.addEventSource(events);
+            } catch (error) {
+                console.error("Erro ao carregar eventos do calendário:", error);
+            }
+        }
+
+        // Get random color for events
+        function getRandomColor() {
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Show reservation details
+        function showReservationDetails(event) {
+            const props = event.extendedProps;
+            alert(`
+Detalhes da Reserva:
+
+Cliente: ${props.clientName}
+Sala: ${props.roomName}
+Data: ${event.start.toLocaleDateString('pt-BR')}
+Horário: ${event.start.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} - ${event.end.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
+Agendado por: ${props.scheduledBy}
+Descrição: ${props.description}
+            `);
+        }
+
+        // Edit reservation
+        window.editReservation = async function(id) {
+            try {
+                const docRef = doc(db, "reservations", id);
+                const docSnap = await getDocs(collection(db, "reservations"));
+                
+                let reservationData = null;
+                docSnap.forEach((doc) => {
+                    if (doc.id === id) {
+                        reservationData = doc.data();
+                    }
+                });
+
+                if (reservationData) {
+                    document.getElementById('editReservationId').value = id;
+                    document.getElementById('editClientName').value = reservationData.clientName;
+                    document.getElementById('editRoomName').value = reservationData.roomName;
+                    document.getElementById('editReservationDate').value = reservationData.reservationDate;
+                    document.getElementById('editStartTime').value = reservationData.startTime;
+                    document.getElementById('editEndTime').value = reservationData.endTime;
+                    document.getElementById('editScheduledBy').value = reservationData.scheduledBy;
+                    document.getElementById('editDescription').value = reservationData.description || '';
+
+                    const modal = new bootstrap.Modal(document.getElementById('editReservationModal'));
+                    modal.show();
+                }
+            } catch (error) {
+                console.error("Erro ao carregar reserva para edição:", error);
+                alert('Erro ao carregar dados da reserva.');
+            }
+        };
+
+        // Update reservation
+        window.updateReservation = async function() {
+            const id = document.getElementById('editReservationId').value;
+            const formData = {
+                clientName: document.getElementById('editClientName').value,
+                roomName: document.getElementById('editRoomName').value,
+                reservationDate: document.getElementById('editReservationDate').value,
+                startTime: document.getElementById('editStartTime').value,
+                endTime: document.getElementById('editEndTime').value,
+                scheduledBy: document.getElementById('editScheduledBy').value,
+                description: document.getElementById('editDescription').value,
+                updatedAt: new Date(),
+                updatedBy: currentUser.email
+            };
+
+            // Validate time
+            if (formData.startTime >= formData.endTime) {
+                alert('A hora de início deve ser anterior à hora de fim.');
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "reservations", id);
+                await updateDoc(docRef, formData);
+                alert('Reserva atualizada com sucesso!');
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editReservationModal'));
+                modal.hide();
+                
+                loadReservations();
+                loadCalendarEvents();
+            } catch (error) {
+                console.error("Erro ao atualizar reserva:", error);
+                alert('Erro ao atualizar reserva. Tente novamente.');
+            }
+        };
+
+        // Delete reservation
+        window.deleteReservation = async function(id) {
+            if (confirm('Tem certeza que deseja excluir esta reserva?')) {
+                try {
+                    await deleteDoc(doc(db, "reservations", id));
+                    alert('Reserva excluída com sucesso!');
+                    loadReservations();
+                    loadCalendarEvents();
+                } catch (error) {
+                    console.error("Erro ao excluir reserva:", error);
+                    alert('Erro ao excluir reserva. Tente novamente.');
+                }
+            }
+        };
+
+        // Make loadReservations available globally
+        window.loadReservations = loadReservations;
     </script>
-  </body>
+</body>
 </html>
+
