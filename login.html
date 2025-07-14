@@ -56,10 +56,10 @@
         .wrapper{
             position: relative;
             width: 430px;
-            height: 500px;
+            height: 520px;
             background: rgba(255, 255, 255, 0.98);
             border-radius: 20px;
-            padding: 120px 32px 64px;
+            padding: 140px 32px 64px;
             border: 1px solid rgba(139, 115, 85, 0.2);
             box-shadow: 0 15px 35px var(--shadow-color);
             backdrop-filter: blur(10px);
@@ -74,12 +74,23 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             width: 140px;
-            height: 70px;
+            height: 90px;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 0 0 20px 20px;
+            padding: 10px;
+        }
+        .form-header img {
+            margin-bottom: 5px;
+            display: block;
+            z-index: 10;
+            position: relative;
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
         }
         .form-header::before, .form-header::after{
             content: "";
@@ -109,7 +120,7 @@
             left: 50%;
             transform: translate(-50%,-50%);
             color: var(--white-color);
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 600;
             transition: var(--transition-3s);
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
@@ -305,14 +316,14 @@
         }
     </style>
     <title>Login & Register | Sistema de Reservas de Salas</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="favicon.png">
 </head>
 <body>
     <div class="wrapper">
         <div class="form-header">
-            <div class="titles">
-                <div class="title-login">Login</div>
-                <div class="title-register">Registro</div>
-            </div>
+            <img src="https://i.postimg.cc/qqGxpNS6/Chat-GPT-Image-14-de-jul-de-2025-16-14-20-1.png" alt="Logo" style="height: 100px; width: auto; max-width: 120px; object-fit: contain;">
         </div>
         <!-- LOGIN FORM -->
         <form action="#" class="login-form" autocomplete="off">
@@ -395,7 +406,7 @@
             loginForm.style.opacity = 1;
             registerForm.style.left = "150%";
             registerForm.style.opacity = 0;
-            wrapper.style.height = "500px";
+            wrapper.style.height = "520px";
             loginTitle.style.top = "50%";
             loginTitle.style.opacity = 1;
             registerTitle.style.top = "50px";
@@ -407,7 +418,7 @@
             loginForm.style.opacity = 0;
             registerForm.style.left = "50%";
             registerForm.style.opacity = 1;
-            wrapper.style.height = "580px";
+            wrapper.style.height = "600px";
             loginTitle.style.top = "-60px";
             loginTitle.style.opacity = 0;
             registerTitle.style.top = "50%";
