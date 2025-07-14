@@ -472,6 +472,23 @@
             font-weight: 500;
         }
 
+        .loading-screen .retry-btn {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #e8ddd4 0%, #d4c4b0 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #8b7355;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .loading-screen .retry-btn:hover {
+            background: linear-gradient(135deg, #d4c4b0 0%, #c4b49f 100%);
+            transform: translateY(-1px);
+        }
+
         /* Smooth transitions for all interactive elements */
         .btn, .card, .form-control, .nav-link, .slider-img {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -526,7 +543,10 @@
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Carregando...</span>
         </div>
-        <p>Verificando autenticação...</p>
+        <p id="loadingText">Verificando autenticação...</p>
+        <button class="retry-btn" id="retryBtn" style="display: none;" onclick="location.reload()">
+            Tentar Novamente
+        </button>
     </div>
 
     <!-- Main Content -->
@@ -860,41 +880,73 @@
         let calendar;
         let currentUser = null;
         let reservationsData = new Map();
+        let authCheckTimeout;
 
-        // Initialize Firebase
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-        } catch (error) {
-            console.error("Erro ao inicializar Firebase:", error);
-            showAlert('Erro de conexão. Redirecionando para login...', 'danger');
-            setTimeout(() => {
-                window.location.href = "login.html";
-            }, 2000);
-        }
+        // Initialize Firebase with timeout and error handling
+        async function initializeFirebase() {
+            try {
+                console.log("Inicializando Firebase...");
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Set timeout for auth check
+                authCheckTimeout = setTimeout(() => {
+                    console.log("Timeout na verificação de autenticação");
+                    document.getElementById('loadingText').textContent = 'Erro de conexão. Clique em "Tentar Novamente" ou vá para o login.';
+                    document.getElementById('retryBtn').style.display = 'block';
+                    
+                    // Add login button
+                    const loginBtn = document.createElement('button');
+                    loginBtn.className = 'retry-btn';
+                    loginBtn.textContent = 'Ir para Login';
+                    loginBtn.style.marginLeft = '10px';
+                    loginBtn.onclick = () => window.location.href = "login.html";
+                    document.getElementById('retryBtn').parentNode.appendChild(loginBtn);
+                }, 10000); // 10 seconds timeout
 
-        // Check authentication state
-        onAuthStateChanged(auth, (user) => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            const mainContent = document.getElementById('mainContent');
-            
-            if (user) {
-                // User is signed in
-                currentUser = user;
-                document.getElementById('userEmail').textContent = user.email;
+                // Check authentication state
+                onAuthStateChanged(auth, (user) => {
+                    clearTimeout(authCheckTimeout);
+                    const loadingScreen = document.getElementById('loadingScreen');
+                    const mainContent = document.getElementById('mainContent');
+                    
+                    console.log("Estado de autenticação:", user ? "Logado" : "Não logado");
+                    
+                    if (user) {
+                        // User is signed in
+                        currentUser = user;
+                        document.getElementById('userEmail').textContent = user.email;
+                        
+                        // Hide loading screen and show main content
+                        loadingScreen.style.display = 'none';
+                        mainContent.style.display = 'block';
+                        
+                        // Initialize the application
+                        initializeReservationApp();
+                    } else {
+                        // User is not signed in, redirect to login
+                        console.log("Redirecionando para login...");
+                        window.location.href = "login.html";
+                    }
+                }, (error) => {
+                    console.error("Erro na verificação de autenticação:", error);
+                    clearTimeout(authCheckTimeout);
+                    document.getElementById('loadingText').textContent = 'Erro de autenticação. Redirecionando para login...';
+                    setTimeout(() => {
+                        window.location.href = "login.html";
+                    }, 2000);
+                });
                 
-                // Hide loading screen and show main content
-                loadingScreen.style.display = 'none';
-                mainContent.style.display = 'block';
-                
-                // Initialize the application
-                initializeApp();
-            } else {
-                // User is not signed in, redirect to login
-                window.location.href = "login.html";
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase:", error);
+                clearTimeout(authCheckTimeout);
+                document.getElementById('loadingText').textContent = 'Erro de conexão. Redirecionando para login...';
+                setTimeout(() => {
+                    window.location.href = "login.html";
+                }, 2000);
             }
-        });
+        }
 
         // Show alert messages
         function showAlert(message, type = 'info') {
@@ -921,7 +973,8 @@
         }
 
         // Initialize the application
-        function initializeApp() {
+        function initializeReservationApp() {
+            console.log("Inicializando aplicação de reservas...");
             initializeCalendar();
             loadReservations();
             setupEventListeners();
@@ -1235,6 +1288,9 @@ Descrição: ${props.description}
 
         // Make loadReservations available globally
         window.loadReservations = loadReservations;
+
+        // Initialize Firebase when page loads
+        initializeFirebase();
     </script>
 </body>
 </html>
