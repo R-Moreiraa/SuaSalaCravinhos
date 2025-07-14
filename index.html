@@ -104,6 +104,14 @@
             border-color: rgba(139, 115, 85, 0.3);
         }
 
+        .btn-primary:disabled {
+            background: rgba(139, 115, 85, 0.3);
+            border-color: rgba(139, 115, 85, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            transform: none;
+            cursor: not-allowed;
+        }
+
         .btn-success {
             background: linear-gradient(135deg, #d9e5d6 0%, #c4d4c0 100%);
             border: 1px solid rgba(139, 115, 85, 0.2);
@@ -489,6 +497,32 @@
             transform: translateY(-1px);
         }
 
+        /* Button loading spinner */
+        .btn-loading {
+            position: relative;
+        }
+
+        .btn-loading .btn-spinner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        .btn-loading .btn-text {
+            opacity: 0;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
         /* Smooth transitions for all interactive elements */
         .btn, .card, .form-control, .nav-link, .slider-img {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -727,9 +761,12 @@
                                             <label for="description" class="form-label">Descrição (opcional)</label>
                                             <textarea class="form-control" id="description" rows="3"></textarea>
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100">
-                                            <i class="fas fa-save me-2"></i>
-                                            Salvar Reserva
+                                        <button type="submit" class="btn btn-primary w-100" id="submitReservationBtn">
+                                            <span class="btn-text">
+                                                <i class="fas fa-save me-2"></i>
+                                                Salvar Reserva
+                                            </span>
+                                            <div class="btn-spinner" style="display: none;"></div>
                                         </button>
                                     </form>
                                 </div>
@@ -837,9 +874,12 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" onclick="updateReservation()">
-                        <i class="fas fa-save me-1"></i>
-                        Salvar Alterações
+                    <button type="button" class="btn btn-primary" onclick="updateReservation()" id="updateReservationBtn">
+                        <span class="btn-text">
+                            <i class="fas fa-save me-1"></i>
+                            Salvar Alterações
+                        </span>
+                        <div class="btn-spinner" style="display: none;"></div>
                     </button>
                 </div>
             </div>
@@ -972,6 +1012,25 @@
             }, 5000);
         }
 
+        // Set button loading state
+        function setButtonLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            const btnText = button.querySelector('.btn-text');
+            const btnSpinner = button.querySelector('.btn-spinner');
+            
+            if (loading) {
+                button.disabled = true;
+                button.classList.add('btn-loading');
+                btnText.style.opacity = '0';
+                btnSpinner.style.display = 'block';
+            } else {
+                button.disabled = false;
+                button.classList.remove('btn-loading');
+                btnText.style.opacity = '1';
+                btnSpinner.style.display = 'none';
+            }
+        }
+
         // Initialize the application
         function initializeReservationApp() {
             console.log("Inicializando aplicação de reservas...");
@@ -1038,43 +1097,87 @@
             document.getElementById('editReservationDate').min = today;
         }
 
-        // Add new reservation
+        // Add new reservation - CORRIGIDO
         async function addReservation(e) {
             e.preventDefault();
             
-            const formData = {
-                clientName: document.getElementById('clientName').value.trim(),
-                roomName: document.getElementById('roomName').value,
-                reservationDate: document.getElementById('reservationDate').value,
-                startTime: document.getElementById('startTime').value,
-                endTime: document.getElementById('endTime').value,
-                scheduledBy: document.getElementById('scheduledBy').value.trim(),
-                description: document.getElementById('description').value.trim(),
-                createdAt: new Date(),
-                createdBy: currentUser.email
-            };
-
-            // Validate time
-            if (formData.startTime >= formData.endTime) {
-                showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
-                return;
-            }
-
-            // Validate required fields
-            if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
-                showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
-                return;
-            }
-
+            console.log("Iniciando criação de reserva...");
+            setButtonLoading('submitReservationBtn', true);
+            
             try {
+                // Validate Firebase connection
+                if (!db || !currentUser) {
+                    throw new Error("Conexão com Firebase não estabelecida ou usuário não autenticado");
+                }
+
+                const formData = {
+                    clientName: document.getElementById('clientName').value.trim(),
+                    roomName: document.getElementById('roomName').value,
+                    reservationDate: document.getElementById('reservationDate').value,
+                    startTime: document.getElementById('startTime').value,
+                    endTime: document.getElementById('endTime').value,
+                    scheduledBy: document.getElementById('scheduledBy').value.trim(),
+                    description: document.getElementById('description').value.trim(),
+                    createdAt: new Date(),
+                    createdBy: currentUser.email
+                };
+
+                console.log("Dados do formulário:", formData);
+
+                // Validate time
+                if (formData.startTime >= formData.endTime) {
+                    showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
+                    return;
+                }
+
+                // Validate required fields
+                if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
+                    showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
+                    return;
+                }
+
+                // Validate date
+                if (!formData.reservationDate) {
+                    showAlert('Por favor, selecione uma data para a reserva.', 'danger');
+                    return;
+                }
+
+                // Validate times
+                if (!formData.startTime || !formData.endTime) {
+                    showAlert('Por favor, defina os horários de início e fim.', 'danger');
+                    return;
+                }
+
+                console.log("Validações passaram, criando documento no Firestore...");
+                
                 const docRef = await addDoc(collection(db, "reservations"), formData);
+                console.log("Documento criado com ID:", docRef.id);
+                
                 showAlert('Reserva criada com sucesso!', 'success');
                 document.getElementById('reservationForm').reset();
+                
+                // Reload data
                 await loadReservations();
                 await loadCalendarEvents();
+                
             } catch (error) {
-                console.error("Erro ao criar reserva:", error);
-                showAlert('Erro ao criar reserva. Tente novamente.', 'danger');
+                console.error("Erro detalhado ao criar reserva:", error);
+                
+                let errorMessage = 'Erro ao criar reserva. ';
+                
+                if (error.code === 'permission-denied') {
+                    errorMessage += 'Permissão negada. Verifique as regras do Firestore.';
+                } else if (error.code === 'unavailable') {
+                    errorMessage += 'Serviço temporariamente indisponível. Tente novamente.';
+                } else if (error.message.includes('Firebase')) {
+                    errorMessage += 'Problema de conexão com o banco de dados.';
+                } else {
+                    errorMessage += error.message || 'Tente novamente.';
+                }
+                
+                showAlert(errorMessage, 'danger');
+            } finally {
+                setButtonLoading('submitReservationBtn', false);
             }
         }
 
@@ -1087,9 +1190,13 @@
             tableBody.innerHTML = '';
 
             try {
+                console.log("Carregando reservas...");
                 reservationsData.clear();
+                
                 const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
                 const querySnapshot = await getDocs(q);
+                
+                console.log(`${querySnapshot.size} reservas encontradas`);
                 
                 querySnapshot.forEach((doc) => {
                     const reservation = doc.data();
@@ -1221,34 +1328,36 @@ Descrição: ${props.description}
             }
         };
 
-        // Update reservation
+        // Update reservation - CORRIGIDO
         window.updateReservation = async function() {
-            const id = document.getElementById('editReservationId').value;
-            const formData = {
-                clientName: document.getElementById('editClientName').value.trim(),
-                roomName: document.getElementById('editRoomName').value,
-                reservationDate: document.getElementById('editReservationDate').value,
-                startTime: document.getElementById('editStartTime').value,
-                endTime: document.getElementById('editEndTime').value,
-                scheduledBy: document.getElementById('editScheduledBy').value.trim(),
-                description: document.getElementById('editDescription').value.trim(),
-                updatedAt: new Date(),
-                updatedBy: currentUser.email
-            };
-
-            // Validate time
-            if (formData.startTime >= formData.endTime) {
-                showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
-                return;
-            }
-
-            // Validate required fields
-            if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
-                showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
-                return;
-            }
-
+            setButtonLoading('updateReservationBtn', true);
+            
             try {
+                const id = document.getElementById('editReservationId').value;
+                const formData = {
+                    clientName: document.getElementById('editClientName').value.trim(),
+                    roomName: document.getElementById('editRoomName').value,
+                    reservationDate: document.getElementById('editReservationDate').value,
+                    startTime: document.getElementById('editStartTime').value,
+                    endTime: document.getElementById('editEndTime').value,
+                    scheduledBy: document.getElementById('editScheduledBy').value.trim(),
+                    description: document.getElementById('editDescription').value.trim(),
+                    updatedAt: new Date(),
+                    updatedBy: currentUser.email
+                };
+
+                // Validate time
+                if (formData.startTime >= formData.endTime) {
+                    showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
+                    return;
+                }
+
+                // Validate required fields
+                if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
+                    showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
+                    return;
+                }
+
                 const docRef = doc(db, "reservations", id);
                 await updateDoc(docRef, formData);
                 showAlert('Reserva atualizada com sucesso!', 'success');
@@ -1261,6 +1370,8 @@ Descrição: ${props.description}
             } catch (error) {
                 console.error("Erro ao atualizar reserva:", error);
                 showAlert('Erro ao atualizar reserva. Tente novamente.', 'danger');
+            } finally {
+                setButtonLoading('updateReservationBtn', false);
             }
         };
 
@@ -1268,6 +1379,8 @@ Descrição: ${props.description}
         window.deleteReservation = async function(id) {
             if (confirm('Tem certeza que deseja excluir esta reserva?')) {
                 try {
+                    console.log("Excluindo reserva:", id);
+                    
                     // Delete from Firestore
                     await deleteDoc(doc(db, "reservations", id));
                     
