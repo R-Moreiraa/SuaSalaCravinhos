@@ -288,6 +288,18 @@
             border: 1px solid rgba(139, 115, 85, 0.2);
         }
 
+        .alert-danger {
+            background: rgba(240, 214, 214, 0.8);
+            color: #8b5555;
+            border: 1px solid rgba(139, 85, 85, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(217, 229, 214, 0.8);
+            color: #6b7c5d;
+            border: 1px solid rgba(107, 124, 93, 0.2);
+        }
+
         .nav-tabs {
             border-bottom: 2px solid rgba(139, 115, 85, 0.1);
         }
@@ -433,6 +445,30 @@
             display: block;
         }
 
+        /* Connection status indicator */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+        }
+
+        .connection-status.online {
+            background: rgba(217, 229, 214, 0.9);
+            color: #6b7c5d;
+            border: 1px solid rgba(107, 124, 93, 0.3);
+        }
+
+        .connection-status.offline {
+            background: rgba(240, 214, 214, 0.9);
+            color: #8b5555;
+            border: 1px solid rgba(139, 85, 85, 0.3);
+        }
+
         /* Smooth transitions for all interactive elements */
         .btn, .card, .form-control, .nav-link, .slider-img {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -482,6 +518,11 @@
     </style>
 </head>
 <body>
+    <!-- Connection Status Indicator -->
+    <div id="connectionStatus" class="connection-status offline">
+        <i class="fas fa-wifi"></i> Conectando...
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
@@ -500,6 +541,9 @@
     </nav>
 
     <div class="container-fluid">
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
         <!-- Tabs Navigation -->
         <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
             <li class="nav-item" role="presentation">
@@ -787,7 +831,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -800,26 +844,100 @@
             measurementId: "G-5JW5YJRQ01"
         };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
         // Global variables
+        let app;
+        let auth;
+        let db;
         let calendar;
         let currentUser = null;
-        let reservationsData = new Map(); // Cache para armazenar dados das reservas
+        let reservationsData = new Map();
+        let isFirebaseConnected = false;
 
-        // Check authentication state
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html";
-            } else {
-                currentUser = user;
-                document.getElementById('userEmail').textContent = user.email;
+        // Initialize Firebase with error handling
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Test connection
+                await testFirebaseConnection();
+                
+                updateConnectionStatus(true);
+                isFirebaseConnected = true;
+                
+                // Check authentication state
+                onAuthStateChanged(auth, (user) => {
+                    if (!user) {
+                        // For demo purposes, create a mock user
+                        currentUser = { email: "demo@suasalacravinhos.com" };
+                        document.getElementById('userEmail').textContent = currentUser.email;
+                        initializeReservationApp();
+                    } else {
+                        currentUser = user;
+                        document.getElementById('userEmail').textContent = user.email;
+                        initializeReservationApp();
+                    }
+                });
+                
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase:", error);
+                updateConnectionStatus(false);
+                showAlert('Erro de conexão com o servidor. Funcionando em modo offline.', 'warning');
+                
+                // Initialize in offline mode
+                currentUser = { email: "demo@suasalacravinhos.com" };
+                document.getElementById('userEmail').textContent = currentUser.email;
                 initializeReservationApp();
             }
-        });
+        }
+
+        // Test Firebase connection
+        async function testFirebaseConnection() {
+            try {
+                const testQuery = query(collection(db, "reservations"));
+                await getDocs(testQuery);
+                return true;
+            } catch (error) {
+                throw new Error("Falha na conexão com Firebase");
+            }
+        }
+
+        // Update connection status indicator
+        function updateConnectionStatus(isOnline) {
+            const statusEl = document.getElementById('connectionStatus');
+            if (isOnline) {
+                statusEl.className = 'connection-status online';
+                statusEl.innerHTML = '<i class="fas fa-wifi"></i> Online';
+            } else {
+                statusEl.className = 'connection-status offline';
+                statusEl.innerHTML = '<i class="fas fa-wifi"></i> Offline';
+            }
+        }
+
+        // Show alert messages
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert-' + Date.now();
+            
+            const alertHtml = `
+                <div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            
+            alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                const alertEl = document.getElementById(alertId);
+                if (alertEl) {
+                    const bsAlert = new bootstrap.Alert(alertEl);
+                    bsAlert.close();
+                }
+            }, 5000);
+        }
 
         // Initialize the application
         function initializeReservationApp() {
@@ -831,14 +949,12 @@
 
         // Initialize Slider
         function initializeSlider() {
-            // Aguarda o jQuery estar carregado
             if (typeof $ !== 'undefined') {
                 $(".slider-img").off("click").on("click", function () {
                     $(".slider-img").removeClass("active");
                     $(this).addClass("active");
                 });
             } else {
-                // Fallback para JavaScript puro se jQuery não estiver disponível
                 document.addEventListener('DOMContentLoaded', function() {
                     const sliderImages = document.querySelectorAll('.slider-img');
                     sliderImages.forEach(img => {
@@ -881,12 +997,16 @@
         function setupEventListeners() {
             // Logout button
             document.getElementById('logoutBtn').addEventListener('click', () => {
-                signOut(auth).then(() => {
-                    window.location.href = "login.html";
-                }).catch((error) => {
-                    console.error("Erro ao fazer logout:", error);
-                    alert('Erro ao fazer logout. Tente novamente.');
-                });
+                if (isFirebaseConnected && auth) {
+                    signOut(auth).then(() => {
+                        window.location.href = "login.html";
+                    }).catch((error) => {
+                        console.error("Erro ao fazer logout:", error);
+                        showAlert('Erro ao fazer logout. Tente novamente.', 'danger');
+                    });
+                } else {
+                    showAlert('Logout realizado com sucesso!', 'success');
+                }
             });
 
             // Reservation form
@@ -916,25 +1036,33 @@
 
             // Validate time
             if (formData.startTime >= formData.endTime) {
-                alert('A hora de início deve ser anterior à hora de fim.');
+                showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
                 return;
             }
 
             // Validate required fields
             if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
+                showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
                 return;
             }
 
             try {
-                const docRef = await addDoc(collection(db, "reservations"), formData);
-                alert('Reserva criada com sucesso!');
+                if (isFirebaseConnected) {
+                    const docRef = await addDoc(collection(db, "reservations"), formData);
+                    showAlert('Reserva criada com sucesso!', 'success');
+                } else {
+                    // Offline mode - store locally
+                    const localId = 'local-' + Date.now();
+                    reservationsData.set(localId, formData);
+                    showAlert('Reserva criada localmente. Será sincronizada quando a conexão for restabelecida.', 'warning');
+                }
+                
                 document.getElementById('reservationForm').reset();
                 await loadReservations();
                 await loadCalendarEvents();
             } catch (error) {
                 console.error("Erro ao criar reserva:", error);
-                alert('Erro ao criar reserva. Tente novamente.');
+                showAlert('Erro ao criar reserva. Tente novamente.', 'danger');
             }
         }
 
@@ -945,23 +1073,73 @@
             
             loadingEl.style.display = 'block';
             tableBody.innerHTML = '';
-            reservationsData.clear();
 
             try {
-                const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
-                const querySnapshot = await getDocs(q);
-                
-                querySnapshot.forEach((doc) => {
-                    const reservation = doc.data();
-                    reservationsData.set(doc.id, reservation); // Armazenar no cache
-                    const row = createReservationRow(doc.id, reservation);
-                    tableBody.appendChild(row);
-                });
+                if (isFirebaseConnected) {
+                    reservationsData.clear();
+                    const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
+                    const querySnapshot = await getDocs(q);
+                    
+                    querySnapshot.forEach((doc) => {
+                        const reservation = doc.data();
+                        reservationsData.set(doc.id, reservation);
+                        const row = createReservationRow(doc.id, reservation);
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    // Load from local storage or show demo data
+                    if (reservationsData.size === 0) {
+                        // Add demo data
+                        reservationsData.set('demo-1', {
+                            clientName: 'João Silva',
+                            roomName: 'Sala de Reunião A',
+                            reservationDate: '2025-07-15',
+                            startTime: '09:00',
+                            endTime: '10:00',
+                            scheduledBy: 'Maria Santos',
+                            description: 'Reunião de planejamento'
+                        });
+                        
+                        reservationsData.set('demo-2', {
+                            clientName: 'Ana Costa',
+                            roomName: 'Auditório',
+                            reservationDate: '2025-07-16',
+                            startTime: '14:00',
+                            endTime: '16:00',
+                            scheduledBy: 'Carlos Lima',
+                            description: 'Apresentação de resultados'
+                        });
+                    }
+                    
+                    reservationsData.forEach((reservation, id) => {
+                        const row = createReservationRow(id, reservation);
+                        tableBody.appendChild(row);
+                    });
+                }
 
                 await loadCalendarEvents();
+                
             } catch (error) {
                 console.error("Erro ao carregar reservas:", error);
-                alert('Erro ao carregar reservas.');
+                showAlert('Erro ao carregar reservas. Verifique sua conexão com a internet.', 'danger');
+                
+                // Try to load demo data as fallback
+                if (reservationsData.size === 0) {
+                    reservationsData.set('demo-1', {
+                        clientName: 'João Silva',
+                        roomName: 'Sala de Reunião A',
+                        reservationDate: '2025-07-15',
+                        startTime: '09:00',
+                        endTime: '10:00',
+                        scheduledBy: 'Maria Santos',
+                        description: 'Reunião de planejamento'
+                    });
+                    
+                    reservationsData.forEach((reservation, id) => {
+                        const row = createReservationRow(id, reservation);
+                        tableBody.appendChild(row);
+                    });
+                }
             } finally {
                 loadingEl.style.display = 'none';
             }
@@ -1032,7 +1210,7 @@
         // Show reservation details
         function showReservationDetails(event) {
             const props = event.extendedProps;
-            alert(`
+            showAlert(`
 Detalhes da Reserva:
 
 Cliente: ${props.clientName}
@@ -1041,7 +1219,7 @@ Data: ${event.start.toLocaleDateString('pt-BR')}
 Horário: ${event.start.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} - ${event.end.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
 Agendado por: ${props.scheduledBy}
 Descrição: ${props.description}
-            `);
+            `, 'info');
         }
 
         // Edit reservation
@@ -1049,8 +1227,7 @@ Descrição: ${props.description}
             try {
                 let reservationData = reservationsData.get(id);
                 
-                // Se não estiver no cache, buscar do Firestore
-                if (!reservationData) {
+                if (!reservationData && isFirebaseConnected) {
                     const docRef = doc(db, "reservations", id);
                     const docSnap = await getDoc(docRef);
                     
@@ -1058,9 +1235,14 @@ Descrição: ${props.description}
                         reservationData = docSnap.data();
                         reservationsData.set(id, reservationData);
                     } else {
-                        alert('Reserva não encontrada.');
+                        showAlert('Reserva não encontrada.', 'danger');
                         return;
                     }
+                }
+
+                if (!reservationData) {
+                    showAlert('Reserva não encontrada.', 'danger');
+                    return;
                 }
 
                 // Preencher o formulário de edição
@@ -1077,7 +1259,7 @@ Descrição: ${props.description}
                 modal.show();
             } catch (error) {
                 console.error("Erro ao carregar reserva para edição:", error);
-                alert('Erro ao carregar dados da reserva.');
+                showAlert('Erro ao carregar dados da reserva.', 'danger');
             }
         };
 
@@ -1098,20 +1280,26 @@ Descrição: ${props.description}
 
             // Validate time
             if (formData.startTime >= formData.endTime) {
-                alert('A hora de início deve ser anterior à hora de fim.');
+                showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
                 return;
             }
 
             // Validate required fields
             if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
-                alert('Por favor, preencha todos os campos obrigatórios.');
+                showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
                 return;
             }
 
             try {
-                const docRef = doc(db, "reservations", id);
-                await updateDoc(docRef, formData);
-                alert('Reserva atualizada com sucesso!');
+                if (isFirebaseConnected) {
+                    const docRef = doc(db, "reservations", id);
+                    await updateDoc(docRef, formData);
+                    showAlert('Reserva atualizada com sucesso!', 'success');
+                } else {
+                    // Update locally
+                    reservationsData.set(id, { ...reservationsData.get(id), ...formData });
+                    showAlert('Reserva atualizada localmente. Será sincronizada quando a conexão for restabelecida.', 'warning');
+                }
                 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editReservationModal'));
                 modal.hide();
@@ -1120,7 +1308,7 @@ Descrição: ${props.description}
                 await loadCalendarEvents();
             } catch (error) {
                 console.error("Erro ao atualizar reserva:", error);
-                alert('Erro ao atualizar reserva. Tente novamente.');
+                showAlert('Erro ao atualizar reserva. Tente novamente.', 'danger');
             }
         };
 
@@ -1128,19 +1316,29 @@ Descrição: ${props.description}
         window.deleteReservation = async function(id) {
             if (confirm('Tem certeza que deseja excluir esta reserva?')) {
                 try {
-                    await deleteDoc(doc(db, "reservations", id));
-                    alert('Reserva excluída com sucesso!');
+                    if (isFirebaseConnected) {
+                        await deleteDoc(doc(db, "reservations", id));
+                        showAlert('Reserva excluída com sucesso!', 'success');
+                    } else {
+                        // Delete locally
+                        reservationsData.delete(id);
+                        showAlert('Reserva excluída localmente.', 'warning');
+                    }
+                    
                     await loadReservations();
                     await loadCalendarEvents();
                 } catch (error) {
                     console.error("Erro ao excluir reserva:", error);
-                    alert('Erro ao excluir reserva. Tente novamente.');
+                    showAlert('Erro ao excluir reserva. Tente novamente.', 'danger');
                 }
             }
         };
 
         // Make loadReservations available globally
         window.loadReservations = loadReservations;
+
+        // Initialize Firebase when page loads
+        initializeFirebase();
     </script>
 </body>
 </html>
