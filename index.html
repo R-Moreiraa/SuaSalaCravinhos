@@ -15,7 +15,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        @import url("https://fonts.googleapis.com/css2?family=Jost:wght@400;700&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap");
 
         * {
             margin: 0px;
@@ -25,172 +25,307 @@
         }
 
         body {
-            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f1eb 50%, #ede7dc 100%);
             min-height: 100vh;
+            color: #6b5b47;
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 2px 25px rgba(139, 115, 85, 0.08);
+            border-bottom: 1px solid rgba(139, 115, 85, 0.1);
         }
 
         .navbar-brand {
-            font-weight: 700;
-            color: #333 !important;
+            font-weight: 600;
+            color: #8b7355 !important;
+            font-size: 1.3rem;
         }
 
         .btn-logout {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            border: none;
-            color: white;
+            background: linear-gradient(135deg, #e8ddd4 0%, #d4c4b0 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #8b7355;
             padding: 8px 20px;
-            border-radius: 25px;
+            border-radius: 30px;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .btn-logout:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(238, 90, 36, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(139, 115, 85, 0.15);
+            background: linear-gradient(135deg, #d4c4b0 0%, #c4b49f 100%);
+            color: #6b5b47;
         }
 
         .container-fluid {
-            padding: 20px;
+            padding: 25px;
         }
 
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 35px rgba(139, 115, 85, 0.08);
             backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .card-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 20px;
+            background: linear-gradient(135deg, #f0e6d6 0%, #e8ddd4 100%);
+            color: #8b7355;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 25px;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+        }
+
+        .card-header h4, .card-header h5 {
+            font-weight: 600;
+            margin: 0;
         }
 
         .btn-primary {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 25px;
-            padding: 10px 25px;
+            background: linear-gradient(135deg, #e8ddd4 0%, #d4c4b0 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #8b7355;
+            border-radius: 30px;
+            padding: 12px 28px;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 8px 25px rgba(139, 115, 85, 0.15);
+            background: linear-gradient(135deg, #d4c4b0 0%, #c4b49f 100%);
+            color: #6b5b47;
+            border-color: rgba(139, 115, 85, 0.3);
         }
 
         .btn-success {
-            background: linear-gradient(45deg, #00b894, #00a085);
-            border: none;
-            border-radius: 25px;
+            background: linear-gradient(135deg, #d9e5d6 0%, #c4d4c0 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #6b7c5d;
+            border-radius: 30px;
             transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #c4d4c0 0%, #b3c7ae 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 124, 93, 0.15);
+            color: #5a6b51;
         }
 
         .btn-warning {
-            background: linear-gradient(45deg, #fdcb6e, #e17055);
-            border: none;
-            border-radius: 25px;
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #8b7355;
+            border-radius: 30px;
             transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e8d4b8 0%, #dbc7a5 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 115, 85, 0.15);
+            color: #6b5b47;
         }
 
         .btn-danger {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            border: none;
-            border-radius: 25px;
+            background: linear-gradient(135deg, #f0d6d6 0%, #e8c4c4 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #8b5555;
+            border-radius: 30px;
             transition: all 0.3s ease;
+            font-weight: 500;
         }
 
-        .form-control {
-            border-radius: 10px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #e8c4c4 0%, #dbb3b3 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 85, 85, 0.15);
+            color: #6b4747;
         }
 
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        .btn-secondary {
+            background: linear-gradient(135deg, #e8e8e8 0%, #d4d4d4 100%);
+            border: 1px solid rgba(139, 115, 85, 0.2);
+            color: #8b7355;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #d4d4d4 0%, #c4c4c4 100%);
+            transform: translateY(-2px);
+            color: #6b5b47;
+        }
+
+        .form-control, .form-select {
+            border-radius: 15px;
+            border: 2px solid rgba(139, 115, 85, 0.15);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+            color: #6b5b47;
+            padding: 12px 16px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: rgba(139, 115, 85, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(139, 115, 85, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .form-label {
+            color: #8b7355;
+            font-weight: 500;
+            margin-bottom: 8px;
         }
 
         .table {
-            border-radius: 10px;
+            border-radius: 15px;
             overflow: hidden;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .table thead th {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+            background: linear-gradient(135deg, #f0e6d6 0%, #e8ddd4 100%);
+            color: #8b7355;
             border: none;
+            font-weight: 600;
+            padding: 18px 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            border-color: rgba(139, 115, 85, 0.1);
+            color: #6b5b47;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(240, 230, 214, 0.3);
         }
 
         #calendar {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(139, 115, 85, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
         .fc-event {
-            border-radius: 8px;
+            border-radius: 10px;
             border: none;
-            padding: 2px 5px;
+            padding: 4px 8px;
+            font-weight: 500;
+        }
+
+        .fc-button-primary {
+            background: linear-gradient(135deg, #e8ddd4 0%, #d4c4b0 100%) !important;
+            border-color: rgba(139, 115, 85, 0.2) !important;
+            color: #8b7355 !important;
+        }
+
+        .fc-button-primary:hover {
+            background: linear-gradient(135deg, #d4c4b0 0%, #c4b49f 100%) !important;
+            border-color: rgba(139, 115, 85, 0.3) !important;
+        }
+
+        .fc-button-primary:disabled {
+            background: rgba(139, 115, 85, 0.1) !important;
+            border-color: rgba(139, 115, 85, 0.1) !important;
+            color: rgba(139, 115, 85, 0.5) !important;
         }
 
         .modal-content {
-            border-radius: 15px;
+            border-radius: 20px;
             border: none;
+            box-shadow: 0 15px 50px rgba(139, 115, 85, 0.15);
         }
 
         .modal-header {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border-radius: 15px 15px 0 0;
+            background: linear-gradient(135deg, #f0e6d6 0%, #e8ddd4 100%);
+            color: #8b7355;
+            border-radius: 20px 20px 0 0;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.1);
+            padding: 25px;
+        }
+
+        .modal-body {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid rgba(139, 115, 85, 0.1);
+            background: rgba(250, 248, 245, 0.8);
+            border-radius: 0 0 20px 20px;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
         }
 
         .spinner-border {
-            color: #667eea;
+            color: #d4c4b0;
         }
 
         .alert {
-            border-radius: 10px;
+            border-radius: 15px;
             border: none;
+            background: rgba(240, 230, 214, 0.8);
+            color: #8b7355;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid rgba(139, 115, 85, 0.1);
         }
 
         .nav-tabs .nav-link {
-            border-radius: 10px 10px 0 0;
+            border-radius: 15px 15px 0 0;
             border: none;
-            color: #667eea;
-            font-weight: 600;
+            color: #8b7355;
+            font-weight: 500;
+            padding: 15px 25px;
+            margin-right: 5px;
+            background: rgba(255, 255, 255, 0.6);
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background: rgba(240, 230, 214, 0.8);
+            color: #6b5b47;
         }
 
         .nav-tabs .nav-link.active {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
+            background: linear-gradient(135deg, #f0e6d6 0%, #e8ddd4 100%);
+            color: #8b7355;
+            border-bottom: 2px solid #d4c4b0;
         }
 
         .tab-content {
-            background: white;
-            border-radius: 0 0 15px 15px;
-            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 15px 15px 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(139, 115, 85, 0.08);
         }
 
         /* Slider Styles */
         .slider-container {
             width: 100%;
             height: 100vh;
-            background-color: #000;
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f1eb 50%, #ede7dc 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -206,16 +341,18 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: 12px;
+            filter: sepia(10%) saturate(80%) brightness(105%);
         }
 
         .slider-img {
             width: 110px;
-            border-radius: 6px;
+            border-radius: 12px;
             cursor: pointer;
             position: relative;
             transition: 0.7s ease;
             overflow: hidden;
+            box-shadow: 0 8px 25px rgba(139, 115, 85, 0.15);
         }
 
         .slider-images .slider-img:first-child,
@@ -237,15 +374,16 @@
         .slider-img h1 {
             font-family: "Jost", sans-serif;
             font-size: 40px;
-            font-weight: 700;
+            font-weight: 600;
             text-align: left;
             text-transform: uppercase;
-            color: #fff;
+            color: #8b7355;
             position: absolute;
             top: 50%;
             left: -10%;
             transform: rotate(270deg);
             transition: 0.7s ease;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
         }
 
         .details {
@@ -257,32 +395,33 @@
         .details h2 {
             font-family: "Jost", sans-serif;
             font-size: 26px;
-            font-weight: 700;
+            font-weight: 600;
             text-align: left;
             line-height: 44px;
-            text-align: left;
-            color: #fff;
+            color: #8b7355;
             text-transform: uppercase;
             transition: 0.7s ease;
             display: none;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
         }
 
         .details p {
             font-family: "Jost", sans-serif;
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 500;
             text-align: left;
             line-height: 33px;
-            text-align: left;
-            color: #fff;
+            color: #8b7355;
             text-transform: uppercase;
             transition: 0.7s ease;
             display: none;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
         }
 
         .slider-img.active {
             width: 766px !important;
             height: 750px !important;
+            box-shadow: 0 15px 50px rgba(139, 115, 85, 0.25);
         }
 
         .slider-img.active h1 {
@@ -292,6 +431,53 @@
         .slider-img.active .details p,
         .slider-img.active .details h2 {
             display: block;
+        }
+
+        /* Smooth transitions for all interactive elements */
+        .btn, .card, .form-control, .nav-link, .slider-img {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(139, 115, 85, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 115, 85, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 115, 85, 0.5);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 15px;
+            }
+            
+            .card-header {
+                padding: 20px;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .slider-container {
+                height: 80vh;
+            }
+            
+            .slider-images {
+                gap: 15px;
+            }
         }
     </style>
 </head>
@@ -438,7 +624,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="roomName" class="form-label">Sala</label>
-                                        <select class="form-control" id="roomName" required>
+                                        <select class="form-select" id="roomName" required>
                                             <option value="">Selecione uma sala</option>
                                             <option value="Sala de Reunião A">Sala de Reunião A</option>
                                             <option value="Sala de Reunião B">Sala de Reunião B</option>
@@ -543,7 +729,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="editRoomName" class="form-label">Sala</label>
-                            <select class="form-control" id="editRoomName" required>
+                            <select class="form-select" id="editRoomName" required>
                                 <option value="">Selecione uma sala</option>
                                 <option value="Sala de Reunião A">Sala de Reunião A</option>
                                 <option value="Sala de Reunião B">Sala de Reunião B</option>
@@ -601,7 +787,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -622,6 +808,7 @@
         // Global variables
         let calendar;
         let currentUser = null;
+        let reservationsData = new Map(); // Cache para armazenar dados das reservas
 
         // Check authentication state
         onAuthStateChanged(auth, (user) => {
@@ -696,6 +883,9 @@
             document.getElementById('logoutBtn').addEventListener('click', () => {
                 signOut(auth).then(() => {
                     window.location.href = "login.html";
+                }).catch((error) => {
+                    console.error("Erro ao fazer logout:", error);
+                    alert('Erro ao fazer logout. Tente novamente.');
                 });
             });
 
@@ -713,13 +903,13 @@
             e.preventDefault();
             
             const formData = {
-                clientName: document.getElementById('clientName').value,
+                clientName: document.getElementById('clientName').value.trim(),
                 roomName: document.getElementById('roomName').value,
                 reservationDate: document.getElementById('reservationDate').value,
                 startTime: document.getElementById('startTime').value,
                 endTime: document.getElementById('endTime').value,
-                scheduledBy: document.getElementById('scheduledBy').value,
-                description: document.getElementById('description').value,
+                scheduledBy: document.getElementById('scheduledBy').value.trim(),
+                description: document.getElementById('description').value.trim(),
                 createdAt: new Date(),
                 createdBy: currentUser.email
             };
@@ -730,12 +920,18 @@
                 return;
             }
 
+            // Validate required fields
+            if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+
             try {
-                await addDoc(collection(db, "reservations"), formData);
+                const docRef = await addDoc(collection(db, "reservations"), formData);
                 alert('Reserva criada com sucesso!');
                 document.getElementById('reservationForm').reset();
-                loadReservations();
-                loadCalendarEvents();
+                await loadReservations();
+                await loadCalendarEvents();
             } catch (error) {
                 console.error("Erro ao criar reserva:", error);
                 alert('Erro ao criar reserva. Tente novamente.');
@@ -749,6 +945,7 @@
             
             loadingEl.style.display = 'block';
             tableBody.innerHTML = '';
+            reservationsData.clear();
 
             try {
                 const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
@@ -756,11 +953,12 @@
                 
                 querySnapshot.forEach((doc) => {
                     const reservation = doc.data();
+                    reservationsData.set(doc.id, reservation); // Armazenar no cache
                     const row = createReservationRow(doc.id, reservation);
                     tableBody.appendChild(row);
                 });
 
-                loadCalendarEvents();
+                await loadCalendarEvents();
             } catch (error) {
                 console.error("Erro ao carregar reservas:", error);
                 alert('Erro ao carregar reservas.');
@@ -796,16 +994,14 @@
         // Load calendar events
         async function loadCalendarEvents() {
             try {
-                const querySnapshot = await getDocs(collection(db, "reservations"));
                 const events = [];
                 
-                querySnapshot.forEach((doc) => {
-                    const reservation = doc.data();
+                reservationsData.forEach((reservation, id) => {
                     const startDateTime = `${reservation.reservationDate}T${reservation.startTime}`;
                     const endDateTime = `${reservation.reservationDate}T${reservation.endTime}`;
                     
                     events.push({
-                        id: doc.id,
+                        id: id,
                         title: `${reservation.roomName} - ${reservation.clientName}`,
                         start: startDateTime,
                         end: endDateTime,
@@ -829,7 +1025,7 @@
 
         // Get random color for events
         function getRandomColor() {
-            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'];
+            const colors = ['#d4c4b0', '#c4b49f', '#b3a48e', '#a8c686', '#8fb069', '#e6c068', '#d4a574', '#c19a6b'];
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
@@ -851,29 +1047,34 @@ Descrição: ${props.description}
         // Edit reservation
         window.editReservation = async function(id) {
             try {
-                const docRef = doc(db, "reservations", id);
-                const docSnap = await getDocs(collection(db, "reservations"));
+                let reservationData = reservationsData.get(id);
                 
-                let reservationData = null;
-                docSnap.forEach((doc) => {
-                    if (doc.id === id) {
-                        reservationData = doc.data();
+                // Se não estiver no cache, buscar do Firestore
+                if (!reservationData) {
+                    const docRef = doc(db, "reservations", id);
+                    const docSnap = await getDoc(docRef);
+                    
+                    if (docSnap.exists()) {
+                        reservationData = docSnap.data();
+                        reservationsData.set(id, reservationData);
+                    } else {
+                        alert('Reserva não encontrada.');
+                        return;
                     }
-                });
-
-                if (reservationData) {
-                    document.getElementById('editReservationId').value = id;
-                    document.getElementById('editClientName').value = reservationData.clientName;
-                    document.getElementById('editRoomName').value = reservationData.roomName;
-                    document.getElementById('editReservationDate').value = reservationData.reservationDate;
-                    document.getElementById('editStartTime').value = reservationData.startTime;
-                    document.getElementById('editEndTime').value = reservationData.endTime;
-                    document.getElementById('editScheduledBy').value = reservationData.scheduledBy;
-                    document.getElementById('editDescription').value = reservationData.description || '';
-
-                    const modal = new bootstrap.Modal(document.getElementById('editReservationModal'));
-                    modal.show();
                 }
+
+                // Preencher o formulário de edição
+                document.getElementById('editReservationId').value = id;
+                document.getElementById('editClientName').value = reservationData.clientName || '';
+                document.getElementById('editRoomName').value = reservationData.roomName || '';
+                document.getElementById('editReservationDate').value = reservationData.reservationDate || '';
+                document.getElementById('editStartTime').value = reservationData.startTime || '';
+                document.getElementById('editEndTime').value = reservationData.endTime || '';
+                document.getElementById('editScheduledBy').value = reservationData.scheduledBy || '';
+                document.getElementById('editDescription').value = reservationData.description || '';
+
+                const modal = new bootstrap.Modal(document.getElementById('editReservationModal'));
+                modal.show();
             } catch (error) {
                 console.error("Erro ao carregar reserva para edição:", error);
                 alert('Erro ao carregar dados da reserva.');
@@ -884,13 +1085,13 @@ Descrição: ${props.description}
         window.updateReservation = async function() {
             const id = document.getElementById('editReservationId').value;
             const formData = {
-                clientName: document.getElementById('editClientName').value,
+                clientName: document.getElementById('editClientName').value.trim(),
                 roomName: document.getElementById('editRoomName').value,
                 reservationDate: document.getElementById('editReservationDate').value,
                 startTime: document.getElementById('editStartTime').value,
                 endTime: document.getElementById('editEndTime').value,
-                scheduledBy: document.getElementById('editScheduledBy').value,
-                description: document.getElementById('editDescription').value,
+                scheduledBy: document.getElementById('editScheduledBy').value.trim(),
+                description: document.getElementById('editDescription').value.trim(),
                 updatedAt: new Date(),
                 updatedBy: currentUser.email
             };
@@ -898,6 +1099,12 @@ Descrição: ${props.description}
             // Validate time
             if (formData.startTime >= formData.endTime) {
                 alert('A hora de início deve ser anterior à hora de fim.');
+                return;
+            }
+
+            // Validate required fields
+            if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
                 return;
             }
 
@@ -909,8 +1116,8 @@ Descrição: ${props.description}
                 const modal = bootstrap.Modal.getInstance(document.getElementById('editReservationModal'));
                 modal.hide();
                 
-                loadReservations();
-                loadCalendarEvents();
+                await loadReservations();
+                await loadCalendarEvents();
             } catch (error) {
                 console.error("Erro ao atualizar reserva:", error);
                 alert('Erro ao atualizar reserva. Tente novamente.');
@@ -923,8 +1130,8 @@ Descrição: ${props.description}
                 try {
                     await deleteDoc(doc(db, "reservations", id));
                     alert('Reserva excluída com sucesso!');
-                    loadReservations();
-                    loadCalendarEvents();
+                    await loadReservations();
+                    await loadCalendarEvents();
                 } catch (error) {
                     console.error("Erro ao excluir reserva:", error);
                     alert('Erro ao excluir reserva. Tente novamente.');
