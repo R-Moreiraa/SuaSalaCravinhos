@@ -966,14 +966,14 @@
                     } else {
                         // User is not signed in, redirect to login
                         console.log("Redirecionando para login...");
-                        window.location.href = "login_improved.html";
+                        window.location.href = "login.html";
                     }
                 }, (error) => {
                     console.error("Erro na verificação de autenticação:", error);
                     clearTimeout(authCheckTimeout);
                     document.getElementById('loadingText').textContent = 'Erro de autenticação. Redirecionando para login...';
                     setTimeout(() => {
-                        window.location.href = "login_improved.html";
+                        window.location.href = "login.html";
                     }, 2000);
                 });
                 
@@ -982,7 +982,7 @@
                 clearTimeout(authCheckTimeout);
                 document.getElementById('loadingText').textContent = 'Erro de conexão. Redirecionando para login...';
                 setTimeout(() => {
-                    window.location.href = "login_improved.html";
+                    window.location.href = "login.html";
                 }, 2000);
             }
         }
@@ -1286,7 +1286,7 @@
                         localStorage.removeItem('userLoggedIn');
                         
                         setTimeout(() => {
-                            window.location.href = "login_improved.html";
+                            window.location.href = "login.html";
                         }, 1000);
                     } catch (error) {
                         console.error("Erro ao fazer logout:", error);
