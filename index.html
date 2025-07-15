@@ -334,6 +334,12 @@
             border-bottom: 2px solid #d4c4b0;
         }
 
+        .nav-tabs .nav-link.disabled {
+            background: rgba(200, 200, 200, 0.5);
+            color: rgba(139, 115, 85, 0.5);
+            cursor: not-allowed;
+        }
+
         .tab-content {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 0 15px 15px 15px;
@@ -453,6 +459,64 @@
             display: block;
         }
 
+        /* Access Control Styles */
+        .access-locked {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60vh;
+            text-align: center;
+            color: #8b7355;
+            background: rgba(240, 230, 214, 0.3);
+            border-radius: 15px;
+            border: 2px dashed rgba(139, 115, 85, 0.3);
+        }
+
+        .access-locked i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.6;
+        }
+
+        .access-locked h3 {
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .access-locked p {
+            opacity: 0.8;
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+        }
+
+        .access-locked .contact-info {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 115, 85, 0.2);
+        }
+
+        .access-locked .contact-info strong {
+            color: #6b5b47;
+        }
+
+        /* User type indicator */
+        .user-type-badge {
+            background: linear-gradient(135deg, #d9e5d6 0%, #c4d4c0 100%);
+            color: #6b7c5d;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .user-type-badge.admin {
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            color: #8b7355;
+        }
+
         /* Loading screen */
         .loading-screen {
             position: fixed;
@@ -523,6 +587,27 @@
             to { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
+        /* User info display */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 15px;
+            background: rgba(240, 230, 214, 0.3);
+            border-radius: 20px;
+            margin-right: 15px;
+        }
+
+        .user-info i {
+            color: #8b7355;
+        }
+
+        .user-info span {
+            color: #6b5b47;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
         /* Smooth transitions for all interactive elements */
         .btn, .card, .form-control, .nav-link, .slider-img {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -568,6 +653,10 @@
             .slider-images {
                 gap: 15px;
             }
+
+            .user-info span {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -591,8 +680,12 @@
                 <a class="navbar-brand" href="#">
                     <img src="https://i.postimg.cc/YSh3Hqtb/fav-1.png" alt="Sua Sala Cravinhos" style="height: 60px; weight: 15px; margin-right: 0px;">         
                 </a>
-                <div class="navbar-nav ms-auto">
-                    <span class="navbar-text me-3" id="userEmail">Carregando...</span>
+                <div class="navbar-nav ms-auto d-flex align-items-center">
+                    <div class="user-info" id="userInfo">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userEmail">Carregando...</span>
+                        <span class="user-type-badge" id="userTypeBadge">Usuário</span>
+                    </div>
                     <button class="btn btn-logout" id="logoutBtn">
                         <i class="fas fa-sign-out-alt me-1"></i>
                         Sair
@@ -608,12 +701,12 @@
             <!-- Tabs Navigation -->
             <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider-pane" type="button" role="tab">
+                    <button class="nav-link active" id="slider-tab" data-bs-toggle="tab" data-bs-target="#slider-pane" type="button" role="tab">
                         <i class="fas fa-images me-2"></i>Galeria
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab">
+                    <button class="nav-link" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab">
                         <i class="fas fa-calendar me-2"></i>Calendário
                     </button>
                 </li>
@@ -627,8 +720,8 @@
             <!-- Tab Content -->
             <div class="tab-content" id="mainTabContent">
                 <!-- Slider Tab -->
-                <div class="tab-pane fade" id="slider-pane" role="tabpanel">
-                    <section class="slider-container">
+                <div class="tab-pane fade show active" id="slider-pane" role="tabpanel">
+                    <section class="slider-container" id="galleryContent">
                         <div class="slider-images">
                             <div class="slider-img">
                                 <img src="https://i.postimg.cc/SNzxj8PY/Whats-App-Image-2025-07-03-at-16-44-10-2.jpg" alt="1" />
@@ -691,127 +784,18 @@
                 </div>
 
                 <!-- Calendar Tab -->
-                <div class="tab-pane fade show active" id="calendar-pane" role="tabpanel">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="mb-0">
-                                        <i class="fas fa-calendar-alt me-2"></i>
-                                        Calendário de Reservas
-                                    </h4>
-                                </div>
-                                <div class="card-body">
-                                    <div id="calendar"></div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="tab-pane fade" id="calendar-pane" role="tabpanel">
+                    <!-- Content will be dynamically loaded based on user permissions -->
+                    <div id="calendarAccessContent">
+                        <!-- This will be populated by JavaScript -->
                     </div>
                 </div>
 
                 <!-- Reservations Management Tab -->
                 <div class="tab-pane fade" id="reservations-pane" role="tabpanel">
-                    <div class="row">
-                        <!-- Add Reservation Form -->
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-plus me-2"></i>
-                                        Nova Reserva
-                                    </h5>
-                                </div>
-                                <div class="card-body">
-                                    <form id="reservationForm">
-                                        <div class="mb-3">
-                                            <label for="clientName" class="form-label">Nome do Cliente</label>
-                                            <input type="text" class="form-control" id="clientName" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="roomName" class="form-label">Sala</label>
-                                            <select class="form-select" id="roomName" required>
-                                                <option value="">Selecione uma sala</option>
-                                                <option value="Sala de Reunião A">Sala de Reunião A</option>
-                                                <option value="Sala de Reunião B">Sala de Reunião B</option>
-                                                <option value="Sala de Conferência">Sala de Conferência</option>
-                                                <option value="Auditório">Auditório</option>
-                                                <option value="Sala de Treinamento">Sala de Treinamento</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="reservationDate" class="form-label">Data</label>
-                                            <input type="date" class="form-control" id="reservationDate" required>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <label for="startTime" class="form-label">Hora Início</label>
-                                                <input type="time" class="form-control" id="startTime" required>
-                                            </div>
-                                            <div class="col-6">
-                                                <label for="endTime" class="form-label">Hora Fim</label>
-                                                <input type="time" class="form-control" id="endTime" required>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3 mt-3">
-                                            <label for="scheduledBy" class="form-label">Agendado por</label>
-                                            <input type="text" class="form-control" id="scheduledBy" required>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="description" class="form-label">Descrição (opcional)</label>
-                                            <textarea class="form-control" id="description" rows="3"></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary w-100" id="submitReservationBtn">
-                                            <span class="btn-text">
-                                                <i class="fas fa-save me-2"></i>
-                                                Salvar Reserva
-                                            </span>
-                                            <div class="btn-spinner" style="display: none;"></div>
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Reservations List -->
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">
-                                        <i class="fas fa-list me-2"></i>
-                                        Lista de Reservas
-                                    </h5>
-                                    <button class="btn btn-success" onclick="loadReservations()">
-                                        <i class="fas fa-sync-alt me-1"></i>
-                                        Atualizar
-                                    </button>
-                                </div>
-                                <div class="card-body">
-                                    <div class="loading" id="loadingReservations">
-                                        <div class="spinner-border" role="status">
-                                            <span class="visually-hidden">Carregando...</span>
-                                        </div>
-                                        <p class="mt-2">Carregando reservas...</p>
-                                    </div>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
-                                                <tr>
-                                                    <th>Cliente</th>
-                                                    <th>Sala</th>
-                                                    <th>Data</th>
-                                                    <th>Horário</th>
-                                                    <th>Agendado por</th>
-                                                    <th>Ações</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="reservationsTableBody">
-                                                <!-- Reservations will be loaded here -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Content will be dynamically loaded based on user permissions -->
+                    <div id="reservationsAccessContent">
+                        <!-- This will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
@@ -901,7 +885,12 @@
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
-        // Firebase configuration
+        // SECURITY NOTE: Firebase API keys for web applications are designed to be public.
+        // The real security comes from Firebase Security Rules, not from hiding the API key.
+        // However, it's recommended to:
+        // 1. Set up API key restrictions in Google Cloud Console
+        // 2. Configure proper Firebase Security Rules
+        // 3. Use environment variables in production builds when possible
         const firebaseConfig = {
             apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
             authDomain: "suasalacravinhos.firebaseapp.com",
@@ -920,6 +909,7 @@
         let currentUser = null;
         let reservationsData = new Map();
         let authCheckTimeout;
+        let userType = 'user'; // 'user' or 'admin'
 
         // Initialize Firebase with timeout and error handling
         async function initializeFirebase() {
@@ -940,7 +930,7 @@
                     loginBtn.className = 'retry-btn';
                     loginBtn.textContent = 'Ir para Login';
                     loginBtn.style.marginLeft = '10px';
-                    loginBtn.onclick = () => window.location.href = "login.html";
+                    loginBtn.onclick = () => window.location.href = "login_improved.html";
                     document.getElementById('retryBtn').parentNode.appendChild(loginBtn);
                 }, 10000); // 10 seconds timeout
 
@@ -957,6 +947,16 @@
                         currentUser = user;
                         document.getElementById('userEmail').textContent = user.email;
                         
+                        // Determine user type based on email
+                        if (user.email === 'admin@admin.com.br') {
+                            userType = 'admin';
+                        } else {
+                            userType = 'user';
+                        }
+                        
+                        // Setup access control based on user type
+                        setupAccessControl();
+                        
                         // Hide loading screen and show main content
                         loadingScreen.style.display = 'none';
                         mainContent.style.display = 'block';
@@ -966,14 +966,14 @@
                     } else {
                         // User is not signed in, redirect to login
                         console.log("Redirecionando para login...");
-                        window.location.href = "login.html";
+                        window.location.href = "login_improved.html";
                     }
                 }, (error) => {
                     console.error("Erro na verificação de autenticação:", error);
                     clearTimeout(authCheckTimeout);
                     document.getElementById('loadingText').textContent = 'Erro de autenticação. Redirecionando para login...';
                     setTimeout(() => {
-                        window.location.href = "login.html";
+                        window.location.href = "login_improved.html";
                     }, 2000);
                 });
                 
@@ -982,9 +982,199 @@
                 clearTimeout(authCheckTimeout);
                 document.getElementById('loadingText').textContent = 'Erro de conexão. Redirecionando para login...';
                 setTimeout(() => {
-                    window.location.href = "login.html";
+                    window.location.href = "login_improved.html";
                 }, 2000);
             }
+        }
+
+        // Setup access control based on user type
+        function setupAccessControl() {
+            const userTypeBadge = document.getElementById('userTypeBadge');
+            const calendarTab = document.getElementById('calendar-tab').parentElement;
+            const reservationsTab = document.getElementById('reservations-tab').parentElement;
+            const calendarAccessContent = document.getElementById('calendarAccessContent');
+            const reservationsAccessContent = document.getElementById('reservationsAccessContent');
+            
+            if (userType === 'admin') {
+                // Admin has full access
+                userTypeBadge.textContent = 'Administrador';
+                userTypeBadge.classList.add('admin');
+                
+                // Show all tabs for admin
+                calendarTab.style.display = 'block';
+                reservationsTab.style.display = 'block';
+                
+                // Load full calendar content
+                calendarAccessContent.innerHTML = getCalendarContent();
+                
+                // Load full reservations content
+                reservationsAccessContent.innerHTML = getReservationsContent();
+                
+                console.log("Acesso completo concedido para administrador:", currentUser.email);
+            } else {
+                // Regular user - only gallery access
+                userTypeBadge.textContent = 'Usuário';
+                
+                // Hide calendar and reservations tabs for regular users
+                calendarTab.style.display = 'none';
+                reservationsTab.style.display = 'none';
+                
+                // Clear content (not needed since tabs are hidden)
+                calendarAccessContent.innerHTML = '';
+                reservationsAccessContent.innerHTML = '';
+                
+                console.log("Acesso limitado à galeria para usuário:", currentUser.email);
+            }
+            
+            // Initialize slider functionality (always available)
+            initializeSlider();
+        }
+
+        // Get access denied content
+        function getAccessDeniedContent(sectionName, sectionType) {
+            const contactInfo = sectionType === 'calendar' ? 
+                'Para visualizar o calendário de reservas' : 
+                'Para gerenciar reservas';
+                
+            return `
+                <div class="access-locked">
+                    <i class="fas fa-lock"></i>
+                    <h3>Acesso Restrito</h3>
+                    <p>${contactInfo}, você precisa de permissões de administrador. Entre em contato com o suporte para solicitar acesso.</p>
+                    <div class="contact-info">
+                        <strong>Contato:</strong> WhatsApp ou email do administrador
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get calendar content for admin users
+        function getCalendarContent() {
+            return `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    Calendário de Reservas
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="calendar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get reservations content for admin users
+        function getReservationsContent() {
+            return `
+                <div class="row">
+                    <!-- Add Reservation Form -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Nova Reserva
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="reservationForm">
+                                    <div class="mb-3">
+                                        <label for="clientName" class="form-label">Nome do Cliente</label>
+                                        <input type="text" class="form-control" id="clientName" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="roomName" class="form-label">Sala</label>
+                                        <select class="form-select" id="roomName" required>
+                                            <option value="">Selecione uma sala</option>
+                                            <option value="Sala de Reunião A">Sala de Reunião A</option>
+                                            <option value="Sala de Reunião B">Sala de Reunião B</option>
+                                            <option value="Sala de Conferência">Sala de Conferência</option>
+                                            <option value="Auditório">Auditório</option>
+                                            <option value="Sala de Treinamento">Sala de Treinamento</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reservationDate" class="form-label">Data</label>
+                                        <input type="date" class="form-control" id="reservationDate" required>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <label for="startTime" class="form-label">Hora Início</label>
+                                            <input type="time" class="form-control" id="startTime" required>
+                                        </div>
+                                        <div class="col-6">
+                                            <label for="endTime" class="form-label">Hora Fim</label>
+                                            <input type="time" class="form-control" id="endTime" required>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3 mt-3">
+                                        <label for="scheduledBy" class="form-label">Agendado por</label>
+                                        <input type="text" class="form-control" id="scheduledBy" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="description" class="form-label">Descrição (opcional)</label>
+                                        <textarea class="form-control" id="description" rows="3"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100" id="submitReservationBtn">
+                                        <span class="btn-text">
+                                            <i class="fas fa-save me-2"></i>
+                                            Salvar Reserva
+                                        </span>
+                                        <div class="btn-spinner" style="display: none;"></div>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reservations List -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-list me-2"></i>
+                                    Lista de Reservas
+                                </h5>
+                                <button class="btn btn-success" onclick="loadReservations()">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    Atualizar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="loading" id="loadingReservations">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                    <p class="mt-2">Carregando reservas...</p>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Cliente</th>
+                                                <th>Sala</th>
+                                                <th>Data</th>
+                                                <th>Horário</th>
+                                                <th>Agendado por</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="reservationsTableBody">
+                                            <!-- Reservations will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
 
         // Show alert messages
@@ -1014,29 +1204,34 @@
         // Set button loading state
         function setButtonLoading(buttonId, loading) {
             const button = document.getElementById(buttonId);
+            if (!button) return;
+            
             const btnText = button.querySelector('.btn-text');
             const btnSpinner = button.querySelector('.btn-spinner');
             
             if (loading) {
                 button.disabled = true;
                 button.classList.add('btn-loading');
-                btnText.style.opacity = '0';
-                btnSpinner.style.display = 'block';
+                if (btnText) btnText.style.opacity = '0';
+                if (btnSpinner) btnSpinner.style.display = 'block';
             } else {
                 button.disabled = false;
                 button.classList.remove('btn-loading');
-                btnText.style.opacity = '1';
-                btnSpinner.style.display = 'none';
+                if (btnText) btnText.style.opacity = '1';
+                if (btnSpinner) btnSpinner.style.display = 'none';
             }
         }
 
         // Initialize the application
         function initializeReservationApp() {
             console.log("Inicializando aplicação de reservas...");
-            initializeCalendar();
-            loadReservations();
+            
+            if (userType === 'admin') {
+                initializeCalendar();
+                loadReservations();
+            }
+            
             setupEventListeners();
-            initializeSlider();
         }
 
         // Initialize Slider
@@ -1047,9 +1242,13 @@
             });
         }
 
-        // Initialize FullCalendar
+        // Initialize FullCalendar (only for admin)
         function initializeCalendar() {
+            if (userType !== 'admin') return;
+            
             const calendarEl = document.getElementById('calendar');
+            if (!calendarEl) return;
+            
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'pt-br',
@@ -1075,29 +1274,54 @@
 
         // Setup event listeners
         function setupEventListeners() {
-            // Logout button
+            // Logout button with confirmation
             document.getElementById('logoutBtn').addEventListener('click', async () => {
-                try {
-                    await signOut(auth);
-                    showAlert('Logout realizado com sucesso!', 'success');
-                    window.location.href = "login.html";
-                } catch (error) {
-                    console.error("Erro ao fazer logout:", error);
-                    showAlert('Erro ao fazer logout. Tente novamente.', 'danger');
+                if (confirm('Tem certeza que deseja sair?')) {
+                    try {
+                        await signOut(auth);
+                        showAlert('Logout realizado com sucesso!', 'success');
+                        
+                        // Clear session data
+                        sessionStorage.clear();
+                        localStorage.removeItem('userLoggedIn');
+                        
+                        setTimeout(() => {
+                            window.location.href = "login_improved.html";
+                        }, 1000);
+                    } catch (error) {
+                        console.error("Erro ao fazer logout:", error);
+                        showAlert('Erro ao fazer logout. Tente novamente.', 'danger');
+                    }
                 }
             });
 
-            // Reservation form
-            document.getElementById('reservationForm').addEventListener('submit', addReservation);
+            // Reservation form (only for admin)
+            if (userType === 'admin') {
+                const reservationForm = document.getElementById('reservationForm');
+                if (reservationForm) {
+                    reservationForm.addEventListener('submit', addReservation);
+                }
 
-            // Set minimum date to today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('reservationDate').min = today;
-            document.getElementById('editReservationDate').min = today;
+                // Set minimum date to today
+                const today = new Date().toISOString().split('T')[0];
+                const reservationDate = document.getElementById('reservationDate');
+                const editReservationDate = document.getElementById('editReservationDate');
+                
+                if (reservationDate) reservationDate.min = today;
+                if (editReservationDate) editReservationDate.min = today;
+
+                // Auto-fill scheduled by field with current user email
+                if (currentUser) {
+                    const scheduledBy = document.getElementById('scheduledBy');
+                    if (scheduledBy) scheduledBy.value = currentUser.email;
+                }
+            }
         }
 
-        // Add new reservation - CORRIGIDO
+        // Enhanced add reservation function with conflict checking (admin only)
         async function addReservation(e) {
+            if (userType !== 'admin') return;
+            
             e.preventDefault();
             
             console.log("Iniciando criação de reserva...");
@@ -1123,27 +1347,26 @@
 
                 console.log("Dados do formulário:", formData);
 
-                // Validate time
-                if (formData.startTime >= formData.endTime) {
-                    showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
-                    return;
-                }
-
-                // Validate required fields
+                // Enhanced validation
                 if (!formData.clientName || !formData.roomName || !formData.scheduledBy) {
                     showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
                     return;
                 }
 
-                // Validate date
-                if (!formData.reservationDate) {
-                    showAlert('Por favor, selecione uma data para a reserva.', 'danger');
+                if (!formData.reservationDate || !formData.startTime || !formData.endTime) {
+                    showAlert('Por favor, defina data e horários.', 'danger');
                     return;
                 }
 
-                // Validate times
-                if (!formData.startTime || !formData.endTime) {
-                    showAlert('Por favor, defina os horários de início e fim.', 'danger');
+                if (formData.startTime >= formData.endTime) {
+                    showAlert('A hora de início deve ser anterior à hora de fim.', 'danger');
+                    return;
+                }
+
+                // Check for conflicts (same room, same date, overlapping time)
+                const hasConflict = await checkReservationConflict(formData);
+                if (hasConflict) {
+                    showAlert('Já existe uma reserva para esta sala no horário selecionado.', 'danger');
                     return;
                 }
 
@@ -1154,6 +1377,9 @@
                 
                 showAlert('Reserva criada com sucesso!', 'success');
                 document.getElementById('reservationForm').reset();
+                
+                // Reset scheduled by field
+                document.getElementById('scheduledBy').value = currentUser.email;
                 
                 // Reload data
                 await loadReservations();
@@ -1180,10 +1406,50 @@
             }
         }
 
-        // Load reservations
+        // Check for reservation conflicts (admin only)
+        async function checkReservationConflict(newReservation, excludeId = null) {
+            if (userType !== 'admin') return false;
+            
+            try {
+                const q = query(collection(db, "reservations"));
+                const querySnapshot = await getDocs(q);
+                
+                for (const doc of querySnapshot.docs) {
+                    if (excludeId && doc.id === excludeId) continue;
+                    
+                    const reservation = doc.data();
+                    
+                    // Check if same room and same date
+                    if (reservation.roomName === newReservation.roomName && 
+                        reservation.reservationDate === newReservation.reservationDate) {
+                        
+                        // Check for time overlap
+                        const existingStart = reservation.startTime;
+                        const existingEnd = reservation.endTime;
+                        const newStart = newReservation.startTime;
+                        const newEnd = newReservation.endTime;
+                        
+                        if ((newStart < existingEnd && newEnd > existingStart)) {
+                            return true; // Conflict found
+                        }
+                    }
+                }
+                
+                return false; // No conflict
+            } catch (error) {
+                console.error("Erro ao verificar conflitos:", error);
+                return false; // Assume no conflict on error
+            }
+        }
+
+        // Load reservations with better error handling (admin only)
         async function loadReservations() {
+            if (userType !== 'admin') return;
+            
             const loadingEl = document.getElementById('loadingReservations');
             const tableBody = document.getElementById('reservationsTableBody');
+            
+            if (!loadingEl || !tableBody) return;
             
             loadingEl.style.display = 'block';
             tableBody.innerHTML = '';
@@ -1197,51 +1463,81 @@
                 
                 console.log(`${querySnapshot.size} reservas encontradas`);
                 
-                querySnapshot.forEach((doc) => {
-                    const reservation = doc.data();
-                    reservationsData.set(doc.id, reservation);
-                    const row = createReservationRow(doc.id, reservation);
-                    tableBody.appendChild(row);
-                });
+                if (querySnapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhuma reserva encontrada</td></tr>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const reservation = doc.data();
+                        reservationsData.set(doc.id, reservation);
+                        const row = createReservationRow(doc.id, reservation);
+                        tableBody.appendChild(row);
+                    });
+                }
 
                 await loadCalendarEvents();
                 
             } catch (error) {
                 console.error("Erro ao carregar reservas:", error);
                 showAlert('Erro ao carregar reservas. Verifique sua conexão com a internet.', 'danger');
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Erro ao carregar reservas</td></tr>';
             } finally {
                 loadingEl.style.display = 'none';
             }
         }
 
-        // Create reservation table row
+        // Create reservation table row with better formatting (admin only)
         function createReservationRow(id, reservation) {
             const row = document.createElement('tr');
             const date = new Date(reservation.reservationDate + 'T00:00:00');
             const formattedDate = date.toLocaleDateString('pt-BR');
             
+            // Check if reservation is in the past
+            const today = new Date();
+            const reservationDateTime = new Date(reservation.reservationDate + 'T' + reservation.endTime);
+            const isPast = reservationDateTime < today;
+            
             row.innerHTML = `
                 <td>${reservation.clientName}</td>
-                <td>${reservation.roomName}</td>
-                <td>${formattedDate}</td>
-                <td>${reservation.startTime} - ${reservation.endTime}</td>
-                <td>${reservation.scheduledBy}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm me-1" onclick="editReservation('${id}')">
+                    <span class="badge bg-secondary">${reservation.roomName}</span>
+                </td>
+                <td>${formattedDate}</td>
+                <td>
+                    <small class="text-muted">${reservation.startTime} - ${reservation.endTime}</small>
+                </td>
+                <td>
+                    <small>${reservation.scheduledBy}</small>
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-sm me-1" onclick="editReservation('${id}')" ${isPast ? 'disabled title="Reserva já finalizada"' : ''}>
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteReservation('${id}')">
+                    <button class="btn btn-danger btn-sm" onclick="deleteReservation('${id}')" ${isPast ? 'disabled title="Reserva já finalizada"' : ''}>
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
             `;
+            
+            if (isPast) {
+                row.classList.add('table-secondary');
+            }
+            
             return row;
         }
 
-        // Load calendar events
+        // Load calendar events with better colors (admin only)
         async function loadCalendarEvents() {
+            if (userType !== 'admin' || !calendar) return;
+            
             try {
                 const events = [];
+                const roomColors = {
+                    'Sala de Reunião A': '#d4c4b0',
+                    'Sala de Reunião B': '#c4b49f',
+                    'Sala de Conferência': '#b3a48e',
+                    'Auditório': '#a8c686',
+                    'Sala de Treinamento': '#8fb069'
+                };
                 
                 reservationsData.forEach((reservation, id) => {
                     const startDateTime = `${reservation.reservationDate}T${reservation.startTime}`;
@@ -1252,8 +1548,8 @@
                         title: `${reservation.roomName} - ${reservation.clientName}`,
                         start: startDateTime,
                         end: endDateTime,
-                        backgroundColor: getRandomColor(),
-                        borderColor: getRandomColor(),
+                        backgroundColor: roomColors[reservation.roomName] || '#d4c4b0',
+                        borderColor: roomColors[reservation.roomName] || '#d4c4b0',
                         extendedProps: {
                             clientName: reservation.clientName,
                             roomName: reservation.roomName,
@@ -1270,29 +1566,30 @@
             }
         }
 
-        // Get random color for events
-        function getRandomColor() {
-            const colors = ['#d4c4b0', '#c4b49f', '#b3a48e', '#a8c686', '#8fb069', '#e6c068', '#d4a574', '#c19a6b'];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-
-        // Show reservation details
+        // Enhanced reservation details display (admin only)
         function showReservationDetails(event) {
+            if (userType !== 'admin') return;
+            
             const props = event.extendedProps;
+            const startTime = event.start.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+            const endTime = event.end.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+            const date = event.start.toLocaleDateString('pt-BR');
+            
             showAlert(`
-Detalhes da Reserva:
-
-Cliente: ${props.clientName}
-Sala: ${props.roomName}
-Data: ${event.start.toLocaleDateString('pt-BR')}
-Horário: ${event.start.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} - ${event.end.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
-Agendado por: ${props.scheduledBy}
-Descrição: ${props.description}
+<strong>Detalhes da Reserva:</strong><br><br>
+<strong>Cliente:</strong> ${props.clientName}<br>
+<strong>Sala:</strong> ${props.roomName}<br>
+<strong>Data:</strong> ${date}<br>
+<strong>Horário:</strong> ${startTime} - ${endTime}<br>
+<strong>Agendado por:</strong> ${props.scheduledBy}<br>
+<strong>Descrição:</strong> ${props.description}
             `, 'info');
         }
 
-        // Edit reservation
+        // Edit reservation with conflict checking (admin only)
         window.editReservation = async function(id) {
+            if (userType !== 'admin') return;
+            
             try {
                 let reservationData = reservationsData.get(id);
                 
@@ -1309,7 +1606,7 @@ Descrição: ${props.description}
                     }
                 }
 
-                // Preencher o formulário de edição
+                // Fill edit form
                 document.getElementById('editReservationId').value = id;
                 document.getElementById('editClientName').value = reservationData.clientName || '';
                 document.getElementById('editRoomName').value = reservationData.roomName || '';
@@ -1327,8 +1624,10 @@ Descrição: ${props.description}
             }
         };
 
-        // Update reservation - CORRIGIDO
+        // Update reservation with conflict checking (admin only)
         window.updateReservation = async function() {
+            if (userType !== 'admin') return;
+            
             setButtonLoading('updateReservationBtn', true);
             
             try {
@@ -1357,6 +1656,13 @@ Descrição: ${props.description}
                     return;
                 }
 
+                // Check for conflicts (excluding current reservation)
+                const hasConflict = await checkReservationConflict(formData, id);
+                if (hasConflict) {
+                    showAlert('Já existe uma reserva para esta sala no horário selecionado.', 'danger');
+                    return;
+                }
+
                 const docRef = doc(db, "reservations", id);
                 await updateDoc(docRef, formData);
                 showAlert('Reserva atualizada com sucesso!', 'success');
@@ -1374,9 +1680,11 @@ Descrição: ${props.description}
             }
         };
 
-        // Delete reservation - CORRIGIDO
+        // Delete reservation with confirmation (admin only)
         window.deleteReservation = async function(id) {
-            if (confirm('Tem certeza que deseja excluir esta reserva?')) {
+            if (userType !== 'admin') return;
+            
+            if (confirm('Tem certeza que deseja excluir esta reserva? Esta ação não pode ser desfeita.')) {
                 try {
                     console.log("Excluindo reserva:", id);
                     
@@ -1398,11 +1706,18 @@ Descrição: ${props.description}
             }
         };
 
-        // Make loadReservations available globally
+        // Make loadReservations available globally (admin only)
         window.loadReservations = loadReservations;
 
         // Initialize Firebase when page loads
         initializeFirebase();
+
+        // Handle page visibility change to refresh data when user returns (admin only)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && currentUser && userType === 'admin') {
+                loadReservations();
+            }
+        });
     </script>
 </body>
 </html>
