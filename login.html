@@ -307,11 +307,64 @@
             }
         }
 
+        /* WHATSAPP BUTTON */
+        .whatsapp-button {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .whatsapp-button:hover {
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .whatsapp-button i {
+            font-size: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
         /* RESPONSIVE STYLES */
         @media only screen and (max-width: 564px){
             .wrapper{
                 margin: 20px;
                 width: calc(100% - 40px);
+            }
+            
+            .whatsapp-button {
+                bottom: 20px;
+                padding: 12px 20px;
+                font-size: 14px;
+                gap: 10px;
+            }
+            
+            .whatsapp-button i {
+                font-size: 20px;
             }
         }
     </style>
@@ -391,6 +444,12 @@
             </div>
         </form>
     </div>
+
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/5516991675037?text=Olá!%20Gostaria%20de%20fazer%20uma%20reserva%20de%20sala." class="whatsapp-button" target="_blank">
+        <i class='bx bxl-whatsapp'></i>
+        <span>Clique aqui e faça já a sua reserva de sala!</span>
+    </a>
 
     <script>
         const loginForm = document.querySelector(".login-form");
