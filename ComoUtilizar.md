@@ -43,22 +43,7 @@
 - **Firebase Authentication** (email/senha)
 - **Firebase Firestore**
 
-### Estrutura da coleção `reservations`:
-
-```plaintext
-clientName      # Nome do cliente
-roomName        # Sala escolhida
-reservationDate # Data da reserva
-startTime       # Horário de início
-endTime         # Horário de término
-scheduledBy     # Responsável pela reserva
-description     # Descrição (opcional)
-createdAt       # Data de criação
-createdBy       # Usuário criador
-updatedAt       # Última modificação
-updatedBy       # Usuário que modificou
-
-## Compatibilidade
+  ## Compatibilidade
 
 - Responsivo para **desktops**, **tablets** e **smartphones**
 - Compatível com navegadores modernos com suporte a:
@@ -83,4 +68,20 @@ updatedBy       # Usuário que modificou
 ## Licença
 
 Este projeto está disponível sob a licença [MIT](LICENSE).
+---
+
+### Estrutura da coleção `reservations`:
+
+```plaintext
+clientName      # Nome do cliente
+roomName        # Sala escolhida
+reservationDate # Data da reserva
+startTime       # Horário de início
+endTime         # Horário de término
+scheduledBy     # Responsável pela reserva
+description     # Descrição (opcional)
+createdAt       # Data de criação
+createdBy       # Usuário criador
+updatedAt       # Última modificação
+updatedBy       # Usuário que modificou
 
