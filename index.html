@@ -517,6 +517,11 @@
             color: #8b7355;
         }
 
+        .user-type-badge.client {
+            background: linear-gradient(135deg, #d6e5f0 0%, #c0d4e8 100%);
+            color: #5d6b7c;
+        }
+
         /* Loading screen */
         .loading-screen {
             position: fixed;
@@ -606,6 +611,36 @@
             color: #6b5b47;
             font-weight: 500;
             font-size: 0.9rem;
+        }
+
+        /* Client status badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: linear-gradient(135deg, #d9e5d6 0%, #c4d4c0 100%);
+            color: #6b7c5d;
+        }
+
+        .status-badge.inactive {
+            background: linear-gradient(135deg, #f0d6d6 0%, #e8c4c4 100%);
+            color: #8b5555;
+        }
+
+        /* Search and filter styles */
+        .search-filter-container {
+            background: rgba(240, 230, 214, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-filter-container .form-control {
+            background: rgba(255, 255, 255, 0.8);
         }
 
         /* Smooth transitions for all interactive elements */
@@ -705,14 +740,24 @@
                         <i class="fas fa-images me-2"></i>Galeria
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
+                <li class="nav-item" role="presentation" style="display: none;">
                     <button class="nav-link" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar-pane" type="button" role="tab">
                         <i class="fas fa-calendar me-2"></i>Calendário
                     </button>
                 </li>
-                <li class="nav-item" role="presentation">
+                <li class="nav-item" role="presentation" style="display: none;">
                     <button class="nav-link" id="reservations-tab" data-bs-toggle="tab" data-bs-target="#reservations-pane" type="button" role="tab">
                         <i class="fas fa-list me-2"></i>Gerenciar Reservas
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation" style="display: none;">
+                    <button class="nav-link" id="clients-tab" data-bs-toggle="tab" data-bs-target="#clients-pane" type="button" role="tab">
+                        <i class="fas fa-users me-2"></i>Gerenciar Clientes
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation" style="display: none;">
+                    <button class="nav-link" id="my-reservations-tab" data-bs-toggle="tab" data-bs-target="#my-reservations-pane" type="button" role="tab">
+                        <i class="fas fa-calendar-check me-2"></i>Minhas Reservas
                     </button>
                 </li>
             </ul>
@@ -785,7 +830,6 @@
 
                 <!-- Calendar Tab -->
                 <div class="tab-pane fade" id="calendar-pane" role="tabpanel">
-                    <!-- Content will be dynamically loaded based on user permissions -->
                     <div id="calendarAccessContent">
                         <!-- This will be populated by JavaScript -->
                     </div>
@@ -793,8 +837,21 @@
 
                 <!-- Reservations Management Tab -->
                 <div class="tab-pane fade" id="reservations-pane" role="tabpanel">
-                    <!-- Content will be dynamically loaded based on user permissions -->
                     <div id="reservationsAccessContent">
+                        <!-- This will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Clients Management Tab -->
+                <div class="tab-pane fade" id="clients-pane" role="tabpanel">
+                    <div id="clientsAccessContent">
+                        <!-- This will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- My Reservations Tab -->
+                <div class="tab-pane fade" id="my-reservations-pane" role="tabpanel">
+                    <div id="myReservationsAccessContent">
                         <!-- This will be populated by JavaScript -->
                     </div>
                 </div>
@@ -816,6 +873,13 @@
                 <div class="modal-body">
                     <form id="editReservationForm">
                         <input type="hidden" id="editReservationId">
+                        <div class="mb-3">
+                            <label for="editClientSelect" class="form-label">Cliente</label>
+                            <select class="form-select" id="editClientSelect">
+                                <option value="">Selecione um cliente</option>
+                                <option value="no-client">Cliente não cadastrado</option>
+                            </select>
+                        </div>
                         <div class="mb-3">
                             <label for="editClientName" class="form-label">Nome do Cliente</label>
                             <input type="text" class="form-control" id="editClientName" required>
@@ -869,6 +933,65 @@
         </div>
     </div>
 
+    <!-- Add/Edit Client Modal -->
+    <div class="modal fade" id="clientModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="clientModalTitle">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Novo Cliente
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="clientForm">
+                        <input type="hidden" id="clientId">
+                        <div class="mb-3">
+                            <label for="clientNameInput" class="form-label">Nome Completo *</label>
+                            <input type="text" class="form-control" id="clientNameInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clientEmailInput" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="clientEmailInput" required>
+                            <div class="form-text">Este email será usado para login do cliente</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clientPhoneInput" class="form-label">Telefone</label>
+                            <input type="tel" class="form-control" id="clientPhoneInput" placeholder="(00) 00000-0000">
+                        </div>
+                        <div class="mb-3">
+                            <label for="clientCompanyInput" class="form-label">Empresa/Organização</label>
+                            <input type="text" class="form-control" id="clientCompanyInput">
+                        </div>
+                        <div class="mb-3">
+                            <label for="clientNotesInput" class="form-label">Observações</label>
+                            <textarea class="form-control" id="clientNotesInput" rows="3" placeholder="Informações adicionais sobre o cliente..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="clientActiveInput" checked>
+                                <label class="form-check-label" for="clientActiveInput">
+                                    Cliente ativo
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveClient()" id="saveClientBtn">
+                        <span class="btn-text">
+                            <i class="fas fa-save me-1"></i>
+                            Salvar Cliente
+                        </span>
+                        <div class="btn-spinner" style="display: none;"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
@@ -883,14 +1006,9 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
-        // SECURITY NOTE: Firebase API keys for web applications are designed to be public.
-        // The real security comes from Firebase Security Rules, not from hiding the API key.
-        // However, it's recommended to:
-        // 1. Set up API key restrictions in Google Cloud Console
-        // 2. Configure proper Firebase Security Rules
-        // 3. Use environment variables in production builds when possible
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCZJNPgEE1pllmmbjqHGCobcsB_udQO7fU",
             authDomain: "suasalacravinhos.firebaseapp.com",
@@ -908,8 +1026,9 @@
         let calendar;
         let currentUser = null;
         let reservationsData = new Map();
+        let clientsData = new Map();
         let authCheckTimeout;
-        let userType = 'user'; // 'user' or 'admin'
+        let userType = 'user'; // 'user', 'client', or 'admin'
 
         // Initialize Firebase with timeout and error handling
         async function initializeFirebase() {
@@ -935,7 +1054,7 @@
                 }, 10000); // 10 seconds timeout
 
                 // Check authentication state
-                onAuthStateChanged(auth, (user) => {
+                onAuthStateChanged(auth, async (user) => {
                     clearTimeout(authCheckTimeout);
                     const loadingScreen = document.getElementById('loadingScreen');
                     const mainContent = document.getElementById('mainContent');
@@ -947,12 +1066,9 @@
                         currentUser = user;
                         document.getElementById('userEmail').textContent = user.email;
                         
-                        // Determine user type based on email
-                        if (user.email === 'admin@admin.com.br') {
-                            userType = 'admin';
-                        } else {
-                            userType = 'user';
-                        }
+                        // Determine user type
+                        userType = await getUserType(user.email);
+                        console.log("Tipo de usuário:", userType);
                         
                         // Setup access control based on user type
                         setupAccessControl();
@@ -987,62 +1103,242 @@
             }
         }
 
+        // Determine user type based on email
+        async function getUserType(email) {
+            try {
+                // Check if admin
+                if (email === 'admin@admin.com.br') {
+                    return 'admin';
+                }
+                
+                // Check if registered client
+                const clientQuery = query(
+                    collection(db, "clients"), 
+                    where("email", "==", email),
+                    where("isActive", "==", true)
+                );
+                const clientSnapshot = await getDocs(clientQuery);
+                
+                if (!clientSnapshot.empty) {
+                    return 'client';
+                }
+                
+                // Default to regular user
+                return 'user';
+            } catch (error) {
+                console.error("Erro ao determinar tipo de usuário:", error);
+                return 'user';
+            }
+        }
+
         // Setup access control based on user type
         function setupAccessControl() {
             const userTypeBadge = document.getElementById('userTypeBadge');
-            const calendarTab = document.getElementById('calendar-tab').parentElement;
-            const reservationsTab = document.getElementById('reservations-tab').parentElement;
-            const calendarAccessContent = document.getElementById('calendarAccessContent');
-            const reservationsAccessContent = document.getElementById('reservationsAccessContent');
+            const tabs = {
+                gallery: document.getElementById('slider-tab').parentElement,
+                calendar: document.getElementById('calendar-tab').parentElement,
+                reservations: document.getElementById('reservations-tab').parentElement,
+                clients: document.getElementById('clients-tab').parentElement,
+                myReservations: document.getElementById('my-reservations-tab').parentElement
+            };
             
-            if (userType === 'admin') {
-                // Admin has full access
-                userTypeBadge.textContent = 'Administrador';
-                userTypeBadge.classList.add('admin');
-                
-                // Show all tabs for admin
-                calendarTab.style.display = 'block';
-                reservationsTab.style.display = 'block';
-                
-                // Load full calendar content
-                calendarAccessContent.innerHTML = getCalendarContent();
-                
-                // Load full reservations content
-                reservationsAccessContent.innerHTML = getReservationsContent();
-                
-                console.log("Acesso completo concedido para administrador:", currentUser.email);
-            } else {
-                // Regular user - only gallery access
-                userTypeBadge.textContent = 'Usuário';
-                
-                // Hide calendar and reservations tabs for regular users
-                calendarTab.style.display = 'none';
-                reservationsTab.style.display = 'none';
-                
-                // Clear content (not needed since tabs are hidden)
-                calendarAccessContent.innerHTML = '';
-                reservationsAccessContent.innerHTML = '';
-                
-                console.log("Acesso limitado à galeria para usuário:", currentUser.email);
+            // Reset all tabs to hidden
+            Object.values(tabs).forEach(tab => {
+                if (tab) tab.style.display = 'none';
+            });
+            
+            // Show tabs based on user type
+            switch(userType) {
+                case 'admin':
+                    userTypeBadge.textContent = 'Administrador';
+                    userTypeBadge.classList.add('admin');
+                    
+                    tabs.gallery.style.display = 'block';
+                    tabs.calendar.style.display = 'block';
+                    tabs.reservations.style.display = 'block';
+                    tabs.clients.style.display = 'block';
+                    
+                    // Load admin content
+                    document.getElementById('calendarAccessContent').innerHTML = getCalendarContent();
+                    document.getElementById('reservationsAccessContent').innerHTML = getReservationsContent();
+                    document.getElementById('clientsAccessContent').innerHTML = getClientsContent();
+                    
+                    console.log("Acesso completo concedido para administrador:", currentUser.email);
+                    break;
+                    
+                case 'client':
+                    userTypeBadge.textContent = 'Cliente';
+                    userTypeBadge.classList.add('client');
+                    
+                    tabs.gallery.style.display = 'block';
+                    tabs.myReservations.style.display = 'block';
+                    
+                    // Load client content
+                    document.getElementById('myReservationsAccessContent').innerHTML = getMyReservationsContent();
+                    
+                    console.log("Acesso de cliente concedido para:", currentUser.email);
+                    break;
+                    
+                case 'user':
+                default:
+                    userTypeBadge.textContent = 'Usuário';
+                    
+                    tabs.gallery.style.display = 'block';
+                    
+                    console.log("Acesso limitado à galeria para usuário:", currentUser.email);
+                    break;
             }
             
             // Initialize slider functionality (always available)
             initializeSlider();
         }
 
-        // Get access denied content
-        function getAccessDeniedContent(sectionName, sectionType) {
-            const contactInfo = sectionType === 'calendar' ? 
-                'Para visualizar o calendário de reservas' : 
-                'Para gerenciar reservas';
-                
+        // Get clients management content for admin
+        function getClientsContent() {
             return `
-                <div class="access-locked">
-                    <i class="fas fa-lock"></i>
-                    <h3>Acesso Restrito</h3>
-                    <p>${contactInfo}, você precisa de permissões de administrador. Entre em contato com o suporte para solicitar acesso.</p>
-                    <div class="contact-info">
-                        <strong>Contato:</strong> WhatsApp ou email do administrador
+                <div class="row">
+                    <!-- Add Client Form -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Novo Cliente
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <button type="button" class="btn btn-primary w-100" onclick="openClientModal()">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Cadastrar Cliente
+                                </button>
+                                <hr>
+                                <div class="search-filter-container">
+                                    <label for="clientSearch" class="form-label">Buscar Clientes</label>
+                                    <input type="text" class="form-control" id="clientSearch" placeholder="Nome, email ou empresa..." onkeyup="filterClients()">
+                                </div>
+                                <div class="mt-3">
+                                    <label class="form-label">Filtrar por Status</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="statusFilter" id="statusAll" value="all" checked onchange="filterClients()">
+                                        <label class="form-check-label" for="statusAll">Todos</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="statusFilter" id="statusActive" value="active" onchange="filterClients()">
+                                        <label class="form-check-label" for="statusActive">Ativos</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="statusFilter" id="statusInactive" value="inactive" onchange="filterClients()">
+                                        <label class="form-check-label" for="statusInactive">Inativos</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clients List -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-users me-2"></i>
+                                    Lista de Clientes
+                                </h5>
+                                <button class="btn btn-success" onclick="loadClients()">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    Atualizar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="loading" id="loadingClients">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                    <p class="mt-2">Carregando clientes...</p>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Nome</th>
+                                                <th>Email</th>
+                                                <th>Empresa</th>
+                                                <th>Status</th>
+                                                <th>Reservas</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="clientsTableBody">
+                                            <!-- Clients will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get my reservations content for clients
+        function getMyReservationsContent() {
+            return `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-calendar-check me-2"></i>
+                                    Minhas Reservas
+                                </h4>
+                                <button class="btn btn-success" onclick="loadMyReservations()">
+                                    <i class="fas fa-sync-alt me-1"></i>
+                                    Atualizar
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="search-filter-container">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Filtrar por Período</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="periodFilter" id="periodAll" value="all" checked onchange="filterMyReservations()">
+                                                <label class="form-check-label" for="periodAll">Todas</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="periodFilter" id="periodFuture" value="future" onchange="filterMyReservations()">
+                                                <label class="form-check-label" for="periodFuture">Futuras</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="periodFilter" id="periodPast" value="past" onchange="filterMyReservations()">
+                                                <label class="form-check-label" for="periodPast">Passadas</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="roomFilter" class="form-label">Filtrar por Sala</label>
+                                            <select class="form-select" id="roomFilter" onchange="filterMyReservations()">
+                                                <option value="">Todas as salas</option>
+                                                <option value="Sala de Reunião A">Sala de Reunião A</option>
+                                                <option value="Sala de Reunião B">Sala de Reunião B</option>
+                                                <option value="Sala de Conferência">Sala de Conferência</option>
+                                                <option value="Auditório">Auditório</option>
+                                                <option value="Sala de Treinamento">Sala de Treinamento</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="loading" id="loadingMyReservations">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Carregando...</span>
+                                    </div>
+                                    <p class="mt-2">Carregando suas reservas...</p>
+                                </div>
+                                
+                                <div id="myReservationsContainer">
+                                    <!-- Reservations will be loaded here as cards -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1069,7 +1365,7 @@
             `;
         }
 
-        // Get reservations content for admin users
+        // Get reservations content for admin users (modified to include client selection)
         function getReservationsContent() {
             return `
                 <div class="row">
@@ -1084,6 +1380,13 @@
                             </div>
                             <div class="card-body">
                                 <form id="reservationForm">
+                                    <div class="mb-3">
+                                        <label for="clientSelect" class="form-label">Cliente</label>
+                                        <select class="form-select" id="clientSelect" onchange="handleClientSelection()">
+                                            <option value="">Selecione um cliente</option>
+                                            <option value="no-client">Cliente não cadastrado</option>
+                                        </select>
+                                    </div>
                                     <div class="mb-3">
                                         <label for="clientName" class="form-label">Nome do Cliente</label>
                                         <input type="text" class="form-control" id="clientName" required>
@@ -1229,6 +1532,10 @@
             if (userType === 'admin') {
                 initializeCalendar();
                 loadReservations();
+                loadClients();
+                loadClientsIntoDropdowns();
+            } else if (userType === 'client') {
+                loadMyReservations();
             }
             
             setupEventListeners();
@@ -1318,7 +1625,328 @@
             }
         }
 
-        // Enhanced add reservation function with conflict checking (admin only)
+        // Load clients into dropdowns (admin only)
+        async function loadClientsIntoDropdowns() {
+            if (userType !== 'admin') return;
+            
+            try {
+                const clientSelect = document.getElementById('clientSelect');
+                const editClientSelect = document.getElementById('editClientSelect');
+                
+                if (!clientSelect) return;
+                
+                // Clear existing options except default ones
+                const defaultOptions = clientSelect.innerHTML;
+                clientSelect.innerHTML = defaultOptions;
+                if (editClientSelect) editClientSelect.innerHTML = defaultOptions;
+                
+                // Load active clients
+                const q = query(
+                    collection(db, "clients"), 
+                    where("isActive", "==", true),
+                    orderBy("name", "asc")
+                );
+                const querySnapshot = await getDocs(q);
+                
+                querySnapshot.forEach((doc) => {
+                    const client = doc.data();
+                    const option = document.createElement('option');
+                    option.value = doc.id;
+                    option.textContent = `${client.name} (${client.email})`;
+                    option.dataset.clientName = client.name;
+                    option.dataset.clientEmail = client.email;
+                    
+                    clientSelect.appendChild(option);
+                    if (editClientSelect) editClientSelect.appendChild(option.cloneNode(true));
+                });
+                
+            } catch (error) {
+                console.error("Erro ao carregar clientes nos dropdowns:", error);
+            }
+        }
+
+        // Handle client selection in reservation form
+        window.handleClientSelection = function() {
+            const clientSelect = document.getElementById('clientSelect');
+            const clientNameInput = document.getElementById('clientName');
+            
+            if (!clientSelect || !clientNameInput) return;
+            
+            const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+            
+            if (clientSelect.value === 'no-client' || clientSelect.value === '') {
+                // Enable manual input
+                clientNameInput.value = '';
+                clientNameInput.readOnly = false;
+                clientNameInput.placeholder = 'Digite o nome do cliente';
+            } else {
+                // Auto-fill from selected client
+                clientNameInput.value = selectedOption.dataset.clientName || '';
+                clientNameInput.readOnly = true;
+                clientNameInput.placeholder = 'Nome preenchido automaticamente';
+            }
+        };
+
+        // Load clients (admin only)
+        async function loadClients() {
+            if (userType !== 'admin') return;
+            
+            const loadingEl = document.getElementById('loadingClients');
+            const tableBody = document.getElementById('clientsTableBody');
+            
+            if (!loadingEl || !tableBody) return;
+            
+            loadingEl.style.display = 'block';
+            tableBody.innerHTML = '';
+
+            try {
+                console.log("Carregando clientes...");
+                clientsData.clear();
+                
+                const q = query(collection(db, "clients"), orderBy("name", "asc"));
+                const querySnapshot = await getDocs(q);
+                
+                console.log(`${querySnapshot.size} clientes encontrados`);
+                
+                if (querySnapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum cliente encontrado</td></tr>';
+                } else {
+                    for (const doc of querySnapshot.docs) {
+                        const client = doc.data();
+                        clientsData.set(doc.id, client);
+                        
+                        // Count reservations for this client
+                        const reservationCount = await getClientReservationCount(client.email);
+                        
+                        const row = createClientRow(doc.id, client, reservationCount);
+                        tableBody.appendChild(row);
+                    }
+                }
+
+                // Reload clients in dropdowns
+                await loadClientsIntoDropdowns();
+                
+            } catch (error) {
+                console.error("Erro ao carregar clientes:", error);
+                showAlert('Erro ao carregar clientes. Verifique sua conexão com a internet.', 'danger');
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Erro ao carregar clientes</td></tr>';
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Get reservation count for a client
+        async function getClientReservationCount(clientEmail) {
+            try {
+                const q = query(
+                    collection(db, "reservations"),
+                    where("clientEmail", "==", clientEmail)
+                );
+                const querySnapshot = await getDocs(q);
+                return querySnapshot.size;
+            } catch (error) {
+                console.error("Erro ao contar reservas do cliente:", error);
+                return 0;
+            }
+        }
+
+        // Create client table row
+        function createClientRow(id, client, reservationCount) {
+            const row = document.createElement('tr');
+            
+            row.innerHTML = `
+                <td>${client.name}</td>
+                <td>${client.email}</td>
+                <td>${client.company || '-'}</td>
+                <td>
+                    <span class="status-badge ${client.isActive ? 'active' : 'inactive'}">
+                        ${client.isActive ? 'Ativo' : 'Inativo'}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">${reservationCount}</span>
+                </td>
+                <td>
+                    <button class="btn btn-warning btn-sm me-1" onclick="editClient('${id}')" title="Editar cliente">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteClient('${id}')" title="Excluir cliente">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            return row;
+        }
+
+        // Open client modal for adding/editing
+        window.openClientModal = function(clientId = null) {
+            const modal = new bootstrap.Modal(document.getElementById('clientModal'));
+            const modalTitle = document.getElementById('clientModalTitle');
+            const form = document.getElementById('clientForm');
+            
+            // Reset form
+            form.reset();
+            document.getElementById('clientId').value = '';
+            document.getElementById('clientActiveInput').checked = true;
+            
+            if (clientId) {
+                // Edit mode
+                modalTitle.innerHTML = '<i class="fas fa-user-edit me-2"></i>Editar Cliente';
+                const client = clientsData.get(clientId);
+                if (client) {
+                    document.getElementById('clientId').value = clientId;
+                    document.getElementById('clientNameInput').value = client.name || '';
+                    document.getElementById('clientEmailInput').value = client.email || '';
+                    document.getElementById('clientPhoneInput').value = client.phone || '';
+                    document.getElementById('clientCompanyInput').value = client.company || '';
+                    document.getElementById('clientNotesInput').value = client.notes || '';
+                    document.getElementById('clientActiveInput').checked = client.isActive !== false;
+                }
+            } else {
+                // Add mode
+                modalTitle.innerHTML = '<i class="fas fa-user-plus me-2"></i>Novo Cliente';
+            }
+            
+            modal.show();
+        };
+
+        // Save client (add or edit)
+        window.saveClient = async function() {
+            if (userType !== 'admin') return;
+            
+            setButtonLoading('saveClientBtn', true);
+            
+            try {
+                const clientId = document.getElementById('clientId').value;
+                const formData = {
+                    name: document.getElementById('clientNameInput').value.trim(),
+                    email: document.getElementById('clientEmailInput').value.trim().toLowerCase(),
+                    phone: document.getElementById('clientPhoneInput').value.trim(),
+                    company: document.getElementById('clientCompanyInput').value.trim(),
+                    notes: document.getElementById('clientNotesInput').value.trim(),
+                    isActive: document.getElementById('clientActiveInput').checked
+                };
+
+                // Validate required fields
+                if (!formData.name || !formData.email) {
+                    showAlert('Por favor, preencha nome e email.', 'danger');
+                    return;
+                }
+
+                // Validate email format
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(formData.email)) {
+                    showAlert('Por favor, insira um email válido.', 'danger');
+                    return;
+                }
+
+                if (clientId) {
+                    // Update existing client
+                    formData.updatedAt = new Date();
+                    formData.updatedBy = currentUser.email;
+                    
+                    const docRef = doc(db, "clients", clientId);
+                    await updateDoc(docRef, formData);
+                    showAlert('Cliente atualizado com sucesso!', 'success');
+                } else {
+                    // Check for duplicate email
+                    const emailQuery = query(
+                        collection(db, "clients"),
+                        where("email", "==", formData.email)
+                    );
+                    const emailSnapshot = await getDocs(emailQuery);
+                    
+                    if (!emailSnapshot.empty) {
+                        showAlert('Já existe um cliente cadastrado com este email.', 'danger');
+                        return;
+                    }
+                    
+                    // Add new client
+                    formData.createdAt = new Date();
+                    formData.createdBy = currentUser.email;
+                    
+                    await addDoc(collection(db, "clients"), formData);
+                    showAlert('Cliente cadastrado com sucesso!', 'success');
+                }
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('clientModal'));
+                modal.hide();
+                
+                await loadClients();
+                
+            } catch (error) {
+                console.error("Erro ao salvar cliente:", error);
+                showAlert('Erro ao salvar cliente. Tente novamente.', 'danger');
+            } finally {
+                setButtonLoading('saveClientBtn', false);
+            }
+        };
+
+        // Edit client
+        window.editClient = function(clientId) {
+            openClientModal(clientId);
+        };
+
+        // Delete client
+        window.deleteClient = async function(clientId) {
+            if (userType !== 'admin') return;
+            
+            const client = clientsData.get(clientId);
+            if (!client) return;
+            
+            // Check if client has reservations
+            const reservationCount = await getClientReservationCount(client.email);
+            
+            let confirmMessage = `Tem certeza que deseja excluir o cliente "${client.name}"?`;
+            if (reservationCount > 0) {
+                confirmMessage += `\n\nEste cliente possui ${reservationCount} reserva(s). As reservas não serão excluídas, mas perderão a vinculação com o cliente.`;
+            }
+            
+            if (confirm(confirmMessage)) {
+                try {
+                    await deleteDoc(doc(db, "clients", clientId));
+                    showAlert('Cliente excluído com sucesso!', 'success');
+                    await loadClients();
+                } catch (error) {
+                    console.error("Erro ao excluir cliente:", error);
+                    showAlert('Erro ao excluir cliente. Tente novamente.', 'danger');
+                }
+            }
+        };
+
+        // Filter clients
+        window.filterClients = function() {
+            const searchTerm = document.getElementById('clientSearch').value.toLowerCase();
+            const statusFilter = document.querySelector('input[name="statusFilter"]:checked').value;
+            const tableBody = document.getElementById('clientsTableBody');
+            
+            if (!tableBody) return;
+            
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 4) return; // Skip empty rows
+                
+                const name = cells[0].textContent.toLowerCase();
+                const email = cells[1].textContent.toLowerCase();
+                const company = cells[2].textContent.toLowerCase();
+                const status = cells[3].querySelector('.status-badge').classList.contains('active') ? 'active' : 'inactive';
+                
+                const matchesSearch = name.includes(searchTerm) || 
+                                    email.includes(searchTerm) || 
+                                    company.includes(searchTerm);
+                
+                const matchesStatus = statusFilter === 'all' || 
+                                    (statusFilter === 'active' && status === 'active') ||
+                                    (statusFilter === 'inactive' && status === 'inactive');
+                
+                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+            });
+        };
+
+        // Enhanced add reservation function with client linking (admin only)
         async function addReservation(e) {
             if (userType !== 'admin') return;
             
@@ -1333,6 +1961,10 @@
                     throw new Error("Conexão com Firebase não estabelecida ou usuário não autenticado");
                 }
 
+                const clientSelect = document.getElementById('clientSelect');
+                const selectedClientId = clientSelect.value;
+                const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+
                 const formData = {
                     clientName: document.getElementById('clientName').value.trim(),
                     roomName: document.getElementById('roomName').value,
@@ -1344,6 +1976,15 @@
                     createdAt: new Date(),
                     createdBy: currentUser.email
                 };
+
+                // Add client linking fields
+                if (selectedClientId && selectedClientId !== 'no-client') {
+                    formData.clientId = selectedClientId;
+                    formData.clientEmail = selectedOption.dataset.clientEmail;
+                    formData.isLinkedToClient = true;
+                } else {
+                    formData.isLinkedToClient = false;
+                }
 
                 console.log("Dados do formulário:", formData);
 
@@ -1378,8 +2019,10 @@
                 showAlert('Reserva criada com sucesso!', 'success');
                 document.getElementById('reservationForm').reset();
                 
-                // Reset scheduled by field
+                // Reset form to default state
                 document.getElementById('scheduledBy').value = currentUser.email;
+                document.getElementById('clientSelect').value = '';
+                handleClientSelection();
                 
                 // Reload data
                 await loadReservations();
@@ -1496,8 +2139,13 @@
             const reservationDateTime = new Date(reservation.reservationDate + 'T' + reservation.endTime);
             const isPast = reservationDateTime < today;
             
+            // Show client linking status
+            const clientDisplay = reservation.isLinkedToClient ? 
+                `${reservation.clientName} <i class="fas fa-link text-success" title="Vinculado a cliente cadastrado"></i>` :
+                reservation.clientName;
+            
             row.innerHTML = `
-                <td>${reservation.clientName}</td>
+                <td>${clientDisplay}</td>
                 <td>
                     <span class="badge bg-secondary">${reservation.roomName}</span>
                 </td>
@@ -1554,7 +2202,8 @@
                             clientName: reservation.clientName,
                             roomName: reservation.roomName,
                             scheduledBy: reservation.scheduledBy,
-                            description: reservation.description || 'Sem descrição'
+                            description: reservation.description || 'Sem descrição',
+                            isLinkedToClient: reservation.isLinkedToClient || false
                         }
                     });
                 });
@@ -1575,6 +2224,10 @@
             const endTime = event.end.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
             const date = event.start.toLocaleDateString('pt-BR');
             
+            const linkStatus = props.isLinkedToClient ? 
+                '<br><strong>Status:</strong> <span class="text-success">Vinculado a cliente cadastrado</span>' : 
+                '<br><strong>Status:</strong> <span class="text-muted">Cliente não cadastrado</span>';
+            
             showAlert(`
 <strong>Detalhes da Reserva:</strong><br><br>
 <strong>Cliente:</strong> ${props.clientName}<br>
@@ -1582,9 +2235,202 @@
 <strong>Data:</strong> ${date}<br>
 <strong>Horário:</strong> ${startTime} - ${endTime}<br>
 <strong>Agendado por:</strong> ${props.scheduledBy}<br>
-<strong>Descrição:</strong> ${props.description}
+<strong>Descrição:</strong> ${props.description}${linkStatus}
             `, 'info');
         }
+
+        // Load my reservations (client only)
+        async function loadMyReservations() {
+            if (userType !== 'client') return;
+            
+            const loadingEl = document.getElementById('loadingMyReservations');
+            const container = document.getElementById('myReservationsContainer');
+            
+            if (!loadingEl || !container) return;
+            
+            loadingEl.style.display = 'block';
+            container.innerHTML = '';
+
+            try {
+                console.log("Carregando reservas do cliente...");
+                
+                const q = query(
+                    collection(db, "reservations"),
+                    where("clientEmail", "==", currentUser.email),
+                    orderBy("reservationDate", "desc")
+                );
+                const querySnapshot = await getDocs(q);
+                
+                console.log(`${querySnapshot.size} reservas encontradas para ${currentUser.email}`);
+                
+                if (querySnapshot.empty) {
+                    container.innerHTML = `
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                            <h5>Nenhuma reserva encontrada</h5>
+                            <p>Você ainda não possui reservas vinculadas ao seu email.</p>
+                        </div>
+                    `;
+                } else {
+                    const reservationsArray = [];
+                    querySnapshot.forEach((doc) => {
+                        reservationsArray.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    
+                    // Store for filtering
+                    window.myReservationsData = reservationsArray;
+                    
+                    displayMyReservations(reservationsArray);
+                }
+                
+            } catch (error) {
+                console.error("Erro ao carregar reservas do cliente:", error);
+                showAlert('Erro ao carregar suas reservas. Verifique sua conexão com a internet.', 'danger');
+                container.innerHTML = `
+                    <div class="text-center text-danger py-5">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <h5>Erro ao carregar reservas</h5>
+                        <p>Tente novamente mais tarde.</p>
+                    </div>
+                `;
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        // Display my reservations as cards
+        function displayMyReservations(reservations) {
+            const container = document.getElementById('myReservationsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            reservations.forEach(reservation => {
+                const card = createReservationCard(reservation);
+                container.appendChild(card);
+            });
+        }
+
+        // Create reservation card for client view
+        function createReservationCard(reservation) {
+            const card = document.createElement('div');
+            card.className = 'col-md-6 col-lg-4 mb-4';
+            
+            const date = new Date(reservation.reservationDate + 'T00:00:00');
+            const formattedDate = date.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Check if reservation is in the past, present, or future
+            const today = new Date();
+            const reservationDate = new Date(reservation.reservationDate + 'T' + reservation.startTime);
+            const reservationEndDate = new Date(reservation.reservationDate + 'T' + reservation.endTime);
+            
+            let statusClass = 'secondary';
+            let statusText = 'Agendada';
+            let statusIcon = 'calendar-check';
+            
+            if (reservationEndDate < today) {
+                statusClass = 'success';
+                statusText = 'Finalizada';
+                statusIcon = 'check-circle';
+            } else if (reservationDate <= today && today <= reservationEndDate) {
+                statusClass = 'warning';
+                statusText = 'Em andamento';
+                statusIcon = 'clock';
+            } else {
+                statusClass = 'primary';
+                statusText = 'Agendada';
+                statusIcon = 'calendar-check';
+            }
+            
+            card.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-door-open me-2"></i>
+                            ${reservation.roomName}
+                        </h6>
+                        <span class="badge bg-${statusClass}">
+                            <i class="fas fa-${statusIcon} me-1"></i>
+                            ${statusText}
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>Data:</strong><br>
+                            <small class="text-muted">${formattedDate}</small>
+                        </p>
+                        <p class="card-text">
+                            <strong>Horário:</strong><br>
+                            <i class="fas fa-clock me-1"></i>
+                            ${reservation.startTime} - ${reservation.endTime}
+                        </p>
+                        <p class="card-text">
+                            <strong>Agendado por:</strong><br>
+                            <small class="text-muted">${reservation.scheduledBy}</small>
+                        </p>
+                        ${reservation.description ? `
+                            <p class="card-text">
+                                <strong>Descrição:</strong><br>
+                                <small class="text-muted">${reservation.description}</small>
+                            </p>
+                        ` : ''}
+                    </div>
+                    <div class="card-footer text-muted">
+                        <small>
+                            <i class="fas fa-calendar-plus me-1"></i>
+                            Criada em ${new Date(reservation.createdAt.seconds * 1000).toLocaleDateString('pt-BR')}
+                        </small>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        // Filter my reservations
+        window.filterMyReservations = function() {
+            if (!window.myReservationsData) return;
+            
+            const periodFilter = document.querySelector('input[name="periodFilter"]:checked').value;
+            const roomFilter = document.getElementById('roomFilter').value;
+            
+            let filteredReservations = window.myReservationsData;
+            
+            // Filter by period
+            if (periodFilter !== 'all') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                filteredReservations = filteredReservations.filter(reservation => {
+                    const reservationDate = new Date(reservation.reservationDate + 'T00:00:00');
+                    
+                    if (periodFilter === 'future') {
+                        return reservationDate >= today;
+                    } else if (periodFilter === 'past') {
+                        return reservationDate < today;
+                    }
+                    
+                    return true;
+                });
+            }
+            
+            // Filter by room
+            if (roomFilter) {
+                filteredReservations = filteredReservations.filter(reservation => 
+                    reservation.roomName === roomFilter
+                );
+            }
+            
+            displayMyReservations(filteredReservations);
+        };
 
         // Edit reservation with conflict checking (admin only)
         window.editReservation = async function(id) {
@@ -1608,6 +2454,15 @@
 
                 // Fill edit form
                 document.getElementById('editReservationId').value = id;
+                
+                // Handle client selection
+                const editClientSelect = document.getElementById('editClientSelect');
+                if (reservationData.isLinkedToClient && reservationData.clientId) {
+                    editClientSelect.value = reservationData.clientId;
+                } else {
+                    editClientSelect.value = 'no-client';
+                }
+                
                 document.getElementById('editClientName').value = reservationData.clientName || '';
                 document.getElementById('editRoomName').value = reservationData.roomName || '';
                 document.getElementById('editReservationDate').value = reservationData.reservationDate || '';
@@ -1616,11 +2471,35 @@
                 document.getElementById('editScheduledBy').value = reservationData.scheduledBy || '';
                 document.getElementById('editDescription').value = reservationData.description || '';
 
+                // Handle client name field state
+                handleEditClientSelection();
+
                 const modal = new bootstrap.Modal(document.getElementById('editReservationModal'));
                 modal.show();
             } catch (error) {
                 console.error("Erro ao carregar reserva para edição:", error);
                 showAlert('Erro ao carregar dados da reserva.', 'danger');
+            }
+        };
+
+        // Handle client selection in edit form
+        window.handleEditClientSelection = function() {
+            const clientSelect = document.getElementById('editClientSelect');
+            const clientNameInput = document.getElementById('editClientName');
+            
+            if (!clientSelect || !clientNameInput) return;
+            
+            const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+            
+            if (clientSelect.value === 'no-client' || clientSelect.value === '') {
+                // Enable manual input
+                clientNameInput.readOnly = false;
+                clientNameInput.placeholder = 'Digite o nome do cliente';
+            } else {
+                // Auto-fill from selected client
+                clientNameInput.value = selectedOption.dataset.clientName || '';
+                clientNameInput.readOnly = true;
+                clientNameInput.placeholder = 'Nome preenchido automaticamente';
             }
         };
 
@@ -1632,6 +2511,10 @@
             
             try {
                 const id = document.getElementById('editReservationId').value;
+                const clientSelect = document.getElementById('editClientSelect');
+                const selectedClientId = clientSelect.value;
+                const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+                
                 const formData = {
                     clientName: document.getElementById('editClientName').value.trim(),
                     roomName: document.getElementById('editRoomName').value,
@@ -1643,6 +2526,17 @@
                     updatedAt: new Date(),
                     updatedBy: currentUser.email
                 };
+
+                // Update client linking fields
+                if (selectedClientId && selectedClientId !== 'no-client') {
+                    formData.clientId = selectedClientId;
+                    formData.clientEmail = selectedOption.dataset.clientEmail;
+                    formData.isLinkedToClient = true;
+                } else {
+                    formData.clientId = null;
+                    formData.clientEmail = null;
+                    formData.isLinkedToClient = false;
+                }
 
                 // Validate time
                 if (formData.startTime >= formData.endTime) {
@@ -1706,16 +2600,23 @@
             }
         };
 
-        // Make loadReservations available globally (admin only)
+        // Make functions available globally
         window.loadReservations = loadReservations;
+        window.loadClients = loadClients;
+        window.loadMyReservations = loadMyReservations;
 
         // Initialize Firebase when page loads
         initializeFirebase();
 
-        // Handle page visibility change to refresh data when user returns (admin only)
+        // Handle page visibility change to refresh data when user returns
         document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && currentUser && userType === 'admin') {
-                loadReservations();
+            if (!document.hidden && currentUser) {
+                if (userType === 'admin') {
+                    loadReservations();
+                    loadClients();
+                } else if (userType === 'client') {
+                    loadMyReservations();
+                }
             }
         });
     </script>
