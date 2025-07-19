@@ -743,6 +743,47 @@ padding: 20px;
 display: none;
 }
 }
+
+/* Error and retry styles */
+.error-container {
+text-align: center;
+padding: 20px;
+}
+
+.error-icon {
+font-size: 2rem;
+color: #dc3545;
+margin-bottom: 10px;
+}
+
+.retry-section {
+margin-top: 15px;
+}
+
+.connectivity-status {
+display: inline-flex;
+align-items: center;
+gap: 5px;
+font-size: 0.9rem;
+padding: 5px 10px;
+border-radius: 15px;
+margin-bottom: 10px;
+}
+
+.connectivity-status.online {
+background: rgba(40, 167, 69, 0.1);
+color: #28a745;
+}
+
+.connectivity-status.offline {
+background: rgba(220, 53, 69, 0.1);
+color: #dc3545;
+}
+
+.connectivity-status.checking {
+background: rgba(255, 193, 7, 0.1);
+color: #ffc107;
+}
 </style>
 </head>
 <body>
@@ -1097,6 +1138,104 @@ window.location.href = "login.html";
 }
 }
 
+// Test Firebase connectivity
+async function testFirebaseConnectivity() {
+try {
+console.log("Testando conectividade com Firebase...");
+
+// Test authentication state
+if (!auth || !currentUser) {
+throw new Error("Usuário não autenticado");
+}
+
+// Test Firestore connection with a simple read
+const testDoc = doc(db, "test", "connectivity");
+await getDoc(testDoc);
+
+console.log("Conectividade com Firebase OK");
+return true;
+} catch (error) {
+console.error("Erro de conectividade com Firebase:", error);
+return false;
+}
+}
+
+// Enhanced error handling for Firebase operations
+function getFirebaseErrorMessage(error) {
+console.error("Detalhes do erro Firebase:", error);
+
+switch (error.code) {
+case 'permission-denied':
+return 'Acesso negado. Verifique as permissões do usuário.';
+case 'unavailable':
+return 'Serviço temporariamente indisponível. Tente novamente em alguns minutos.';
+case 'unauthenticated':
+return 'Usuário não autenticado. Faça login novamente.';
+case 'failed-precondition':
+return 'Configuração do banco de dados incompleta. Contate o administrador.';
+case 'not-found':
+return 'Dados não encontrados no banco de dados.';
+case 'deadline-exceeded':
+case 'timeout':
+return 'Timeout na conexão. Verifique sua conexão com a internet.';
+case 'network-request-failed':
+return 'Falha na conexão de rede. Verifique sua conexão com a internet.';
+default:
+if (error.message.includes('network')) {
+return 'Problema de conectividade. Verifique sua conexão com a internet.';
+} else if (error.message.includes('Firebase')) {
+return 'Erro no serviço Firebase. Tente novamente mais tarde.';
+} else {
+return `Erro inesperado: ${error.message}`;
+}
+}
+}
+
+// Show alert messages
+function showAlert(message, type = 'info') {
+const alertContainer = document.getElementById('alertContainer');
+const alertId = 'alert-' + Date.now();
+
+const alertHtml = `
+<div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
+${message}
+<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+`;
+
+alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+
+// Auto-remove after 5 seconds
+setTimeout(() => {
+const alertEl = document.getElementById(alertId);
+if (alertEl) {
+const bsAlert = new bootstrap.Alert(alertEl);
+bsAlert.close();
+}
+}, 5000);
+}
+
+// Set button loading state
+function setButtonLoading(buttonId, loading) {
+const button = document.getElementById(buttonId);
+if (!button) return;
+
+const btnText = button.querySelector('.btn-text');
+const btnSpinner = button.querySelector('.btn-spinner');
+
+if (loading) {
+button.disabled = true;
+button.classList.add('btn-loading');
+if (btnText) btnText.style.opacity = '0';
+if (btnSpinner) btnSpinner.style.display = 'block';
+} else {
+button.disabled = false;
+button.classList.remove('btn-loading');
+if (btnText) btnText.style.opacity = '1';
+if (btnSpinner) btnSpinner.style.display = 'none';
+}
+}
+
 // Setup access control based on user type
 function setupAccessControl() {
 const userTypeBadge = document.getElementById('userTypeBadge');
@@ -1377,51 +1516,6 @@ Calendário de Reservas
 </div>
 </div>
 `;
-}
-
-// Show alert messages
-function showAlert(message, type = 'info') {
-const alertContainer = document.getElementById('alertContainer');
-const alertId = 'alert-' + Date.now();
-
-const alertHtml = `
-<div id="${alertId}" class="alert alert-${type} alert-dismissible fade show" role="alert">
-${message}
-<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-</div>
-`;
-
-alertContainer.insertAdjacentHTML('beforeend', alertHtml);
-
-// Auto-remove after 5 seconds
-setTimeout(() => {
-const alertEl = document.getElementById(alertId);
-if (alertEl) {
-const bsAlert = new bootstrap.Alert(alertEl);
-bsAlert.close();
-}
-}, 5000);
-}
-
-// Set button loading state
-function setButtonLoading(buttonId, loading) {
-const button = document.getElementById(buttonId);
-if (!button) return;
-
-const btnText = button.querySelector('.btn-text');
-const btnSpinner = button.querySelector('.btn-spinner');
-
-if (loading) {
-button.disabled = true;
-button.classList.add('btn-loading');
-if (btnText) btnText.style.opacity = '0';
-if (btnSpinner) btnSpinner.style.display = 'block';
-} else {
-button.disabled = false;
-button.classList.remove('btn-loading');
-if (btnText) btnText.style.opacity = '1';
-if (btnSpinner) btnSpinner.style.display = 'none';
-}
 }
 
 // Initialize the application
@@ -1734,8 +1828,8 @@ return false; // Assume no conflict on error
 }
 }
 
-// Load users from Firestore
-async function loadUsers() {
+// Load users from Firestore with enhanced error handling and retry
+async function loadUsers(retryCount = 0) {
 if (userType !== 'admin') return;
 
 const loadingEl = document.getElementById('loadingUsers');
@@ -1747,23 +1841,68 @@ loadingEl.style.display = 'block';
 tableBody.innerHTML = '';
 
 try {
-console.log("Carregando usuários...");
+console.log(`Carregando usuários... (tentativa ${retryCount + 1})`);
+
+// Test connectivity first
+const isConnected = await testFirebaseConnectivity();
+if (!isConnected) {
+throw new Error("Falha na conectividade com Firebase");
+}
+
+// Clear previous data
 usersData.clear();
 
+// Create query with timeout
 const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
-const querySnapshot = await getDocs(q);
+
+// Set a timeout for the operation
+const timeoutPromise = new Promise((_, reject) => {
+setTimeout(() => reject(new Error('timeout')), 15000); // 15 seconds timeout
+});
+
+const querySnapshot = await Promise.race([
+getDocs(q),
+timeoutPromise
+]);
 
 console.log(`${querySnapshot.size} usuários encontrados`);
 
 if (querySnapshot.empty) {
-tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum usuário encontrado</td></tr>';
+// Check if collection exists by trying to create a test document
+try {
+const testQuery = query(collection(db, "users"));
+await getDocs(testQuery);
+tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum usuário cadastrado ainda</td></tr>';
+} catch (collectionError) {
+console.error("Coleção 'users' pode não existir:", collectionError);
+tableBody.innerHTML = `
+<tr>
+<td colspan="3" class="text-center text-warning">
+<i class="fas fa-exclamation-triangle me-2"></i>
+Coleção de usuários não encontrada. 
+<br><small>Contate o administrador para configurar o banco de dados.</small>
+</td>
+</tr>
+`;
+}
 } else {
 querySnapshot.forEach((doc) => {
 const user = doc.data();
+
+// Validate user data structure
+if (user.name && user.email) {
 usersData.set(doc.id, user);
 const row = createUserRow(doc.id, user);
 tableBody.appendChild(row);
+} else {
+console.warn("Documento de usuário com estrutura inválida:", doc.id, user);
+}
 });
+
+// Show success message if this was a retry
+if (retryCount > 0) {
+showAlert('Usuários carregados com sucesso!', 'success');
+}
 }
 
 // Update clients dropdown in reservation form
@@ -1773,8 +1912,43 @@ updateEditClientsDropdown();
 
 } catch (error) {
 console.error("Erro ao carregar usuários:", error);
-showAlert('Erro ao carregar usuários. Verifique sua conexão com a internet.', 'danger');
-tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Erro ao carregar usuários</td></tr>';
+
+const errorMessage = getFirebaseErrorMessage(error);
+
+// Show specific error message
+showAlert(errorMessage, 'danger');
+
+// Create retry button in table
+const retryButton = retryCount < 2 ? `
+<button class="btn btn-primary btn-sm mt-2" onclick="loadUsers(${retryCount + 1})">
+<i class="fas fa-sync-alt me-1"></i>
+Tentar Novamente
+</button>
+` : `
+<button class="btn btn-secondary btn-sm mt-2" onclick="location.reload()">
+<i class="fas fa-refresh me-1"></i>
+Recarregar Página
+</button>
+`;
+
+tableBody.innerHTML = `
+<tr>
+<td colspan="3" class="text-center text-danger">
+<i class="fas fa-exclamation-circle me-2"></i>
+Erro ao carregar usuários
+<br><small class="text-muted">${errorMessage}</small>
+<br>${retryButton}
+</td>
+</tr>
+`;
+
+// Auto-retry for network errors (up to 2 times)
+if (retryCount < 2 && (error.code === 'unavailable' || error.code === 'timeout' || error.message.includes('network'))) {
+console.log(`Auto-retry em 3 segundos... (tentativa ${retryCount + 2})`);
+setTimeout(() => {
+loadUsers(retryCount + 1);
+}, 3000);
+}
 } finally {
 loadingEl.style.display = 'none';
 }
@@ -1794,8 +1968,8 @@ row.innerHTML = `
 return row;
 }
 
-// Load reservations with better error handling (admin only)
-async function loadReservations() {
+// Load reservations with enhanced error handling and retry (admin only)
+async function loadReservations(retryCount = 0) {
 if (userType !== 'admin') return;
 
 const loadingEl = document.getElementById('loadingReservations');
@@ -1807,11 +1981,29 @@ loadingEl.style.display = 'block';
 tableBody.innerHTML = '';
 
 try {
-console.log("Carregando reservas...");
+console.log(`Carregando reservas... (tentativa ${retryCount + 1})`);
+
+// Test connectivity first
+const isConnected = await testFirebaseConnectivity();
+if (!isConnected) {
+throw new Error("Falha na conectividade com Firebase");
+}
+
+// Clear previous data
 reservationsData.clear();
 
+// Create query with timeout
 const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
-const querySnapshot = await getDocs(q);
+
+// Set a timeout for the operation
+const timeoutPromise = new Promise((_, reject) => {
+setTimeout(() => reject(new Error('timeout')), 15000); // 15 seconds timeout
+});
+
+const querySnapshot = await Promise.race([
+getDocs(q),
+timeoutPromise
+]);
 
 console.log(`${querySnapshot.size} reservas encontradas`);
 
@@ -1820,18 +2012,64 @@ tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum
 } else {
 querySnapshot.forEach((doc) => {
 const reservation = doc.data();
+
+// Validate reservation data structure
+if (reservation.clientName && reservation.roomName && reservation.reservationDate) {
 reservationsData.set(doc.id, reservation);
 const row = createReservationRow(doc.id, reservation);
 tableBody.appendChild(row);
+} else {
+console.warn("Documento de reserva com estrutura inválida:", doc.id, reservation);
+}
 });
+
+// Show success message if this was a retry
+if (retryCount > 0) {
+showAlert('Reservas carregadas com sucesso!', 'success');
+}
 }
 
 await loadCalendarEvents();
 
 } catch (error) {
 console.error("Erro ao carregar reservas:", error);
-showAlert('Erro ao carregar reservas. Verifique sua conexão com a internet.', 'danger');
-tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Erro ao carregar reservas</td></tr>';
+
+const errorMessage = getFirebaseErrorMessage(error);
+
+// Show specific error message
+showAlert(errorMessage, 'danger');
+
+// Create retry button in table
+const retryButton = retryCount < 2 ? `
+<button class="btn btn-primary btn-sm mt-2" onclick="loadReservations(${retryCount + 1})">
+<i class="fas fa-sync-alt me-1"></i>
+Tentar Novamente
+</button>
+` : `
+<button class="btn btn-secondary btn-sm mt-2" onclick="location.reload()">
+<i class="fas fa-refresh me-1"></i>
+Recarregar Página
+</button>
+`;
+
+tableBody.innerHTML = `
+<tr>
+<td colspan="6" class="text-center text-danger">
+<i class="fas fa-exclamation-circle me-2"></i>
+Erro ao carregar reservas
+<br><small class="text-muted">${errorMessage}</small>
+<br>${retryButton}
+</td>
+</tr>
+`;
+
+// Auto-retry for network errors (up to 2 times)
+if (retryCount < 2 && (error.code === 'unavailable' || error.code === 'timeout' || error.message.includes('network'))) {
+console.log(`Auto-retry em 3 segundos... (tentativa ${retryCount + 2})`);
+setTimeout(() => {
+loadReservations(retryCount + 1);
+}, 3000);
+}
 } finally {
 loadingEl.style.display = 'none';
 }
@@ -1877,8 +2115,8 @@ row.classList.add('table-secondary');
 return row;
 }
 
-// Load history of past reservations
-async function loadHistory() {
+// Load history of past reservations with enhanced error handling
+async function loadHistory(retryCount = 0) {
 if (userType !== 'admin') return;
 
 const loadingEl = document.getElementById('loadingHistory');
@@ -1890,13 +2128,29 @@ loadingEl.style.display = 'block';
 tableBody.innerHTML = '';
 
 try {
-console.log("Carregando histórico de reservas...");
+console.log(`Carregando histórico de reservas... (tentativa ${retryCount + 1})`);
+
+// Test connectivity first
+const isConnected = await testFirebaseConnectivity();
+if (!isConnected) {
+throw new Error("Falha na conectividade com Firebase");
+}
 
 const today = new Date();
 today.setHours(0, 0, 0, 0); // Consider only date
 
+// Create query with timeout
 const q = query(collection(db, "reservations"), orderBy("reservationDate", "desc"));
-const querySnapshot = await getDocs(q);
+
+// Set a timeout for the operation
+const timeoutPromise = new Promise((_, reject) => {
+setTimeout(() => reject(new Error('timeout')), 15000); // 15 seconds timeout
+});
+
+const querySnapshot = await Promise.race([
+getDocs(q),
+timeoutPromise
+]);
 
 console.log(`${querySnapshot.size} reservas encontradas no total`);
 
@@ -1906,6 +2160,9 @@ tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhum
 let hasHistory = false;
 querySnapshot.forEach((doc) => {
 const reservation = doc.data();
+
+// Validate reservation data structure
+if (reservation.clientName && reservation.roomName && reservation.reservationDate) {
 const reservationDate = new Date(reservation.reservationDate + 'T00:00:00');
             
 // Check if it's a past reservation
@@ -1914,17 +2171,58 @@ const row = createHistoryRow(doc.id, reservation);
 tableBody.appendChild(row);
 hasHistory = true;
 }
+} else {
+console.warn("Documento de reserva histórica com estrutura inválida:", doc.id, reservation);
+}
 });
 
 if (!hasHistory) {
 tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Nenhuma reserva histórica encontrada</td></tr>';
+} else if (retryCount > 0) {
+// Show success message if this was a retry
+showAlert('Histórico carregado com sucesso!', 'success');
 }
 }
 
 } catch (error) {
 console.error("Erro ao carregar histórico:", error);
-showAlert('Erro ao carregar histórico de reservas.', 'danger');
-tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Erro ao carregar histórico</td></tr>';
+
+const errorMessage = getFirebaseErrorMessage(error);
+
+// Show specific error message
+showAlert(errorMessage, 'danger');
+
+// Create retry button in table
+const retryButton = retryCount < 2 ? `
+<button class="btn btn-primary btn-sm mt-2" onclick="loadHistory(${retryCount + 1})">
+<i class="fas fa-sync-alt me-1"></i>
+Tentar Novamente
+</button>
+` : `
+<button class="btn btn-secondary btn-sm mt-2" onclick="location.reload()">
+<i class="fas fa-refresh me-1"></i>
+Recarregar Página
+</button>
+`;
+
+tableBody.innerHTML = `
+<tr>
+<td colspan="6" class="text-center text-danger">
+<i class="fas fa-exclamation-circle me-2"></i>
+Erro ao carregar histórico de reservas
+<br><small class="text-muted">${errorMessage}</small>
+<br>${retryButton}
+</td>
+</tr>
+`;
+
+// Auto-retry for network errors (up to 2 times)
+if (retryCount < 2 && (error.code === 'unavailable' || error.code === 'timeout' || error.message.includes('network'))) {
+console.log(`Auto-retry em 3 segundos... (tentativa ${retryCount + 2})`);
+setTimeout(() => {
+loadHistory(retryCount + 1);
+}, 3000);
+}
 } finally {
 loadingEl.style.display = 'none';
 }
