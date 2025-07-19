@@ -226,6 +226,49 @@ border-radius: 20px;
 padding: 25px;
 box-shadow: 0 5px 20px rgba(139, 115, 85, 0.08);
 border: 1px solid rgba(255, 255, 255, 0.3);
+min-height: 600px;
+width: 100%;
+}
+
+.fc {
+width: 100%;
+}
+
+.fc-view-harness {
+min-height: 500px;
+}
+
+.fc-daygrid-body {
+width: 100%;
+}
+
+.fc-scrollgrid {
+border: 1px solid rgba(139, 115, 85, 0.1);
+border-radius: 10px;
+}
+
+.fc-col-header-cell {
+background: linear-gradient(135deg, #f0e6d6 0%, #e8ddd4 100%);
+color: #8b7355;
+font-weight: 600;
+border-color: rgba(139, 115, 85, 0.1);
+}
+
+.fc-daygrid-day {
+border-color: rgba(139, 115, 85, 0.1);
+}
+
+.fc-daygrid-day:hover {
+background-color: rgba(240, 230, 214, 0.3);
+}
+
+.fc-day-today {
+background-color: rgba(240, 230, 214, 0.5) !important;
+}
+
+.fc-daygrid-day-number {
+color: #6b5b47;
+font-weight: 500;
 }
 
 .fc-event {
@@ -371,10 +414,19 @@ box-shadow: 0 5px 20px rgba(139, 115, 85, 0.08);
     overflow-x: auto;
     scroll-behavior: smooth;
     scrollbar-width: none; /* Firefox */
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
 .slider-images::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
+}
+
+.slider-images:active {
+    cursor: grabbing;
 }
 
 .slider-img {
@@ -446,13 +498,22 @@ box-shadow: 0 5px 20px rgba(139, 115, 85, 0.08);
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
 }
 
-.slider-btn:hover {
+.slider-btn:hover:not([style*="not-allowed"]) {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(139, 115, 85, 0.15);
     background: linear-gradient(135deg, #d4c4b0 0%, #c4b49f 100%);
     color: #6b5b47;
+}
+
+.slider-btn:active:not([style*="not-allowed"]) {
+    transform: translateY(0);
+    box-shadow: 0 4px 15px rgba(139, 115, 85, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -1381,9 +1442,19 @@ setupEventListeners();
 function initializeCalendar() {
 if (userType !== 'admin') return;
 
-const calendarEl = document.getElementById('calendar');
-if (!calendarEl) return;
+console.log("Inicializando calendário...");
 
+// Aguardar um pouco para garantir que o DOM esteja pronto
+setTimeout(() => {
+const calendarEl = document.getElementById('calendar');
+if (!calendarEl) {
+console.error("Elemento #calendar não encontrado");
+return;
+}
+
+console.log("Elemento calendário encontrado, criando instância...");
+
+try {
 calendar = new FullCalendar.Calendar(calendarEl, {
 initialView: 'dayGridMonth',
 locale: 'pt-br',
@@ -1402,9 +1473,35 @@ events: [],
 eventClick: function(info) {
 showReservationDetails(info.event);
 },
-height: 'auto'
+height: 'auto',
+contentHeight: 600,
+aspectRatio: 1.8,
+// Forçar re-renderização após carregamento
+eventDidMount: function() {
+console.log("Evento montado no calendário");
+},
+// Callback quando o calendário é renderizado
+viewDidMount: function() {
+console.log("Vista do calendário montada");
+}
 });
+
+console.log("Renderizando calendário...");
 calendar.render();
+
+// Forçar atualização após renderização inicial
+setTimeout(() => {
+if (calendar) {
+console.log("Forçando atualização do calendário...");
+calendar.updateSize();
+calendar.render();
+}
+}, 500);
+
+} catch (error) {
+console.error("Erro ao inicializar calendário:", error);
+}
+}, 1000);
 }
 
 // Setup event listeners
@@ -1429,6 +1526,21 @@ showAlert('Erro ao fazer logout. Tente novamente.', 'danger');
 }
 }
 });
+
+// Adicionar evento para re-renderizar calendário quando aba for ativada
+const calendarTab = document.getElementById('calendar-tab');
+if (calendarTab && userType === 'admin') {
+calendarTab.addEventListener('shown.bs.tab', function (e) {
+console.log("Aba do calendário ativada, re-renderizando...");
+setTimeout(() => {
+if (calendar) {
+calendar.updateSize();
+calendar.render();
+console.log("Calendário re-renderizado após ativação da aba");
+}
+}, 100);
+});
+}
 
 // Reservation form (only for admin)
 if (userType === 'admin') {
@@ -2047,55 +2159,145 @@ function initializeNewSlider() {
     
     if (!slider || !prevBtn || !nextBtn) return;
     
-    const slideWidth = 300 + 15; // width + gap
-    let scrollAmount = 0;
-    const maxScroll = slider.scrollWidth - slider.clientWidth;
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    
+    // Função para calcular o tamanho do slide dinamicamente
+    function getSlideWidth() {
+        const slides = slider.querySelectorAll('.slider-img');
+        if (slides.length > 0) {
+            const slideStyle = window.getComputedStyle(slides[0]);
+            const slideWidth = parseFloat(slideStyle.width);
+            const marginRight = parseFloat(slideStyle.marginRight) || 0;
+            const gap = 15; // gap definido no CSS
+            return slideWidth + gap;
+        }
+        return 315; // fallback
+    }
+    
+    // Função para atualizar o estado dos botões
+    function updateButtonStates() {
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        const currentScroll = slider.scrollLeft;
+        
+        // Atualizar estado do botão anterior
+        if (currentScroll <= 0) {
+            prevBtn.style.opacity = '0.5';
+            prevBtn.style.cursor = 'not-allowed';
+        } else {
+            prevBtn.style.opacity = '1';
+            prevBtn.style.cursor = 'pointer';
+        }
+        
+        // Atualizar estado do botão próximo
+        if (currentScroll >= maxScroll - 1) { // -1 para compensar arredondamentos
+            nextBtn.style.opacity = '0.5';
+            nextBtn.style.cursor = 'not-allowed';
+        } else {
+            nextBtn.style.opacity = '1';
+            nextBtn.style.cursor = 'pointer';
+        }
+    }
     
     // Função para rolar o slider
     function scrollSlider(direction) {
+        const slideWidth = getSlideWidth();
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        const currentScroll = slider.scrollLeft;
+        
+        let newScrollPosition;
+        
         if (direction === 'next') {
-            scrollAmount = Math.min(scrollAmount + slideWidth, maxScroll);
+            newScrollPosition = Math.min(currentScroll + slideWidth, maxScroll);
         } else {
-            scrollAmount = Math.max(scrollAmount - slideWidth, 0);
+            newScrollPosition = Math.max(currentScroll - slideWidth, 0);
         }
         
         slider.scrollTo({
-            left: scrollAmount,
+            left: newScrollPosition,
             behavior: 'smooth'
         });
     }
     
     // Adiciona eventos aos botões
-    prevBtn.addEventListener('click', () => scrollSlider('prev'));
-    nextBtn.addEventListener('click', () => scrollSlider('next'));
+    prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (slider.scrollLeft > 0) {
+            scrollSlider('prev');
+        }
+    });
     
-    // Adiciona evento de scroll com o mouse
-    let isDown = false;
-    let startX;
-    let scrollLeft;
+    nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const maxScroll = slider.scrollWidth - slider.clientWidth;
+        if (slider.scrollLeft < maxScroll - 1) {
+            scrollSlider('next');
+        }
+    });
     
+    // Evento de scroll para atualizar estados dos botões
+    slider.addEventListener('scroll', () => {
+        updateButtonStates();
+    });
+    
+    // Eventos de mouse para arrastar
     slider.addEventListener('mousedown', (e) => {
         isDown = true;
+        slider.style.cursor = 'grabbing';
         startX = e.pageX - slider.offsetLeft;
         scrollLeft = slider.scrollLeft;
+        e.preventDefault();
     });
     
     slider.addEventListener('mouseleave', () => {
         isDown = false;
+        slider.style.cursor = 'grab';
     });
     
     slider.addEventListener('mouseup', () => {
         isDown = false;
+        slider.style.cursor = 'grab';
     });
     
     slider.addEventListener('mousemove', (e) => {
         if (!isDown) return;
         e.preventDefault();
         const x = e.pageX - slider.offsetLeft;
-        const walk = (x - startX) * 2; // Velocidade do scroll
+        const walk = (x - startX) * 2;
         slider.scrollLeft = scrollLeft - walk;
-        scrollAmount = slider.scrollLeft;
     });
+    
+    // Eventos de touch para dispositivos móveis
+    let touchStartX = 0;
+    let touchScrollLeft = 0;
+    
+    slider.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchScrollLeft = slider.scrollLeft;
+    }, { passive: true });
+    
+    slider.addEventListener('touchmove', (e) => {
+        if (!touchStartX) return;
+        const touchX = e.touches[0].clientX;
+        const diff = touchStartX - touchX;
+        slider.scrollLeft = touchScrollLeft + diff;
+    }, { passive: true });
+    
+    slider.addEventListener('touchend', () => {
+        touchStartX = 0;
+    }, { passive: true });
+    
+    // Evento de redimensionamento da janela
+    window.addEventListener('resize', () => {
+        updateButtonStates();
+    });
+    
+    // Inicializar estados dos botões
+    setTimeout(() => {
+        updateButtonStates();
+        slider.style.cursor = 'grab';
+    }, 100);
 }
 
 // Make functions available globally
@@ -2117,3 +2319,4 @@ loadHistory();
 </script>
 </body>
 </html>
+
