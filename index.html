@@ -1845,7 +1845,6 @@ console.log(`Carregando usuários... (tentativa ${retryCount + 1})`);
 
 // Test connectivity first
 const isConnected = await testFirebaseConnectivity();
-console.log("Conectividade Firebase:", isConnected);
 if (!isConnected) {
 throw new Error("Falha na conectividade com Firebase");
 }
@@ -1858,7 +1857,7 @@ const q = query(collection(db, "users"), orderBy("createdAt", "desc"));
 
 // Set a timeout for the operation
 const timeoutPromise = new Promise((_, reject) => {
-setTimeout(() => reject(new Error("timeout")), 15000); // 15 seconds timeout
+setTimeout(() => reject(new Error('timeout')), 15000); // 15 seconds timeout
 });
 
 const querySnapshot = await Promise.race([
@@ -1869,7 +1868,6 @@ timeoutPromise
 console.log(`${querySnapshot.size} usuários encontrados`);
 
 if (querySnapshot.empty) {
-console.log("Nenhum usuário encontrado na coleção 'users'.");
 // Check if collection exists by trying to create a test document
 try {
 const testQuery = query(collection(db, "users"));
@@ -1890,7 +1888,6 @@ Coleção de usuários não encontrada.
 } else {
 querySnapshot.forEach((doc) => {
 const user = doc.data();
-console.log("Usuário lido do Firestore:", user);
 
 // Validate user data structure
 if (user.name && user.email) {
@@ -2617,46 +2614,6 @@ loadUsers();
 loadHistory();
 }
 });
-
-// Função para carregar usuários do Firestore
-async function loadUsers() {
-    const usersTableBody = document.getElementById('usersTableBody');
-    const loadingUsers = document.getElementById('loadingUsers');
-
-    usersTableBody.innerHTML = '';
-    loadingUsers.style.display = 'block';
-
-    try {
-        const querySnapshot = await getDocs(collection(db, "users"));
-
-        if (querySnapshot.empty) {
-            usersTableBody.innerHTML = `<tr><td colspan="3">Nenhum usuário cadastrado.</td></tr>`;
-        } else {
-            querySnapshot.forEach((doc) => {
-                const user = doc.data();
-                const createdAt = user.createdAt?.toDate().toLocaleDateString() || 'Data não disponível';
-
-                const row = `
-                    <tr>
-                        <td>${user.name || 'Sem nome'}</td>
-                        <td>${user.email}</td>
-                        <td>${createdAt}</td>
-                    </tr>
-                `;
-                usersTableBody.insertAdjacentHTML('beforeend', row);
-            });
-        }
-    } catch (error) {
-        console.error("Erro ao carregar usuários:", error);
-        showAlert('Erro ao carregar usuários. Tente novamente mais tarde.', 'danger');
-    } finally {
-        loadingUsers.style.display = 'none';
-    }
-}
-
-// Carregar usuários ao clicar na aba "Gerenciar Usuários"
-document.getElementById('users-tab').addEventListener('click', loadUsers);
-
 </script>
 </body>
 </html>
