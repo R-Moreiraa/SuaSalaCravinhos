@@ -634,6 +634,8 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-auth.js";
+        // ADICIONADO: Importar funções do Firestore
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore.js";
 
         // SECURITY NOTE: Firebase API keys for web applications are designed to be public.
         // The real security comes from Firebase Security Rules, not from hiding the API key.
@@ -652,11 +654,12 @@
         };
 
         // Initialize Firebase
-        let app, auth;
+        let app, auth, db; // ADICIONADO: variável db
         
         try {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
+            db = getFirestore(app); // ADICIONADO: inicializar Firestore
             
             // Set persistence based on "remember me" checkbox
             const rememberMe = localStorage.getItem('rememberMe') === 'true';
@@ -784,7 +787,22 @@
             setButtonLoading(document.getElementById("SignUpBtn"), true);
             
             try {
+                // CORREÇÃO: Criar usuário na autenticação E salvar no Firestore
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                console.log('Usuário criado no Auth:', user.uid);
+
+                // ADICIONADO: Salvar as informações do usuário no Firestore
+                await addDoc(collection(db, "users"), {
+                    uid: user.uid, // Boa prática para referência futura
+                    name: name,
+                    email: email,
+                    createdAt: serverTimestamp() // Usa o timestamp do servidor
+                });
+
+                console.log('Usuário salvo no Firestore.');
+
                 showAlert("Conta criada com sucesso! Você pode fazer login agora.", 'success');
                 
                 setTimeout(() => {
@@ -809,6 +827,9 @@
                         break;
                     case 'auth/network-request-failed':
                         errorMessage = "Erro de conexão. Verifique sua internet.";
+                        break;
+                    case 'permission-denied':
+                        errorMessage = "Erro de permissão. Contate o administrador.";
                         break;
                 }
                 
