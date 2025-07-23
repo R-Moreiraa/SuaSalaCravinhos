@@ -7,13 +7,13 @@
     "theme_color": "#8b7355",
     "icons": [
         {
-            "src": "https://i.postimg.cc/25Z60smk/Chat-GPT-Image-23-de-jul-de-2025-15-59-04.png",
-            "sizes": "1024x1024",
+            "src": "https://i.postimg.cc/ncqGWhK5/android-chrome-192x192.png",
+            "sizes": "192X192",
             "type": "image/png"
         },
         {
-            "src": "https://i.postimg.cc/25Z60smk/Chat-GPT-Image-23-de-jul-de-2025-15-59-04.png",
-            "sizes": "1024x1024",
+            "src": "https://i.postimg.cc/dVfJC4b8/android-chrome-512x512.png",
+            "sizes": "512X512",
             "type": "image/png"
         }
     ]
