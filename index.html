@@ -1026,6 +1026,48 @@ Salvar Alterações
 </div>
 </div>
 
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title">
+<i class="fas fa-user-edit me-2"></i>
+Editar Usuário
+</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+<form id="editUserForm">
+<input type="hidden" id="editUserId">
+<div class="mb-3">
+<label for="editUserName" class="form-label">Nome</label>
+<input type="text" class="form-control" id="editUserName" required>
+</div>
+<div class="mb-3">
+<label for="editUserEmail" class="form-label">Email</label>
+<input type="email" class="form-control" id="editUserEmail" required>
+</div>
+<div class="alert alert-warning">
+<i class="fas fa-exclamation-triangle me-2"></i>
+<strong>Atenção:</strong> Alterar o email do usuário pode afetar o acesso ao sistema. O usuário precisará fazer login com o novo email.
+</div>
+</form>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+<button type="button" class="btn btn-primary" onclick="updateUser()" id="updateUserBtn">
+<span class="btn-text">
+<i class="fas fa-save me-1"></i>
+Salvar Alterações
+</span>
+<div class="btn-spinner" style="display: none;"></div>
+</button>
+</div>
+</div>
+</div>
+</div>
+
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -1325,6 +1367,7 @@ Atualizar
 <th>Nome</th>
 <th>Email</th>
 <th>Data de Cadastro</th>
+<th>Ações</th>
 </tr>
 </thead>
 <tbody id="usersTableBody">
@@ -1872,12 +1915,12 @@ if (querySnapshot.empty) {
 try {
 const testQuery = query(collection(db, "users"));
 await getDocs(testQuery);
-tableBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Nenhum usuário cadastrado ainda</td></tr>';
+tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum usuário cadastrado ainda</td></tr>';
 } catch (collectionError) {
 console.error("Coleção 'users' pode não existir:", collectionError);
 tableBody.innerHTML = `
 <tr>
-<td colspan="3" class="text-center text-warning">
+<td colspan="4" class="text-center text-warning">
 <i class="fas fa-exclamation-triangle me-2"></i>
 Coleção de usuários não encontrada. 
 <br><small>Contate o administrador para configurar o banco de dados.</small>
@@ -1933,7 +1976,7 @@ Recarregar Página
 
 tableBody.innerHTML = `
 <tr>
-<td colspan="3" class="text-center text-danger">
+<td colspan="4" class="text-center text-danger">
 <i class="fas fa-exclamation-circle me-2"></i>
 Erro ao carregar usuários
 <br><small class="text-muted">${errorMessage}</small>
@@ -1963,10 +2006,149 @@ row.innerHTML = `
 <td>${user.name}</td>
 <td>${user.email}</td>
 <td>${formattedDate}</td>
+<td>
+<button class="btn btn-warning btn-sm me-1" onclick="editUser('${id}')" title="Editar usuário">
+<i class="fas fa-edit"></i>
+</button>
+<button class="btn btn-danger btn-sm" onclick="deleteUser('${id}')" title="Excluir usuário">
+<i class="fas fa-trash"></i>
+</button>
+</td>
 `;
 
 return row;
 }
+
+// Edit user function
+window.editUser = async function(id) {
+if (userType !== 'admin') return;
+
+try {
+let userData = usersData.get(id);
+
+if (!userData) {
+const docRef = doc(db, "users", id);
+const docSnap = await getDoc(docRef);
+
+if (docSnap.exists()) {
+userData = docSnap.data();
+usersData.set(id, userData);
+} else {
+showAlert('Usuário não encontrado.', 'danger');
+return;
+}
+}
+
+// Fill edit form
+document.getElementById('editUserId').value = id;
+document.getElementById('editUserName').value = userData.name || '';
+document.getElementById('editUserEmail').value = userData.email || '';
+
+const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+modal.show();
+} catch (error) {
+console.error("Erro ao carregar usuário para edição:", error);
+showAlert('Erro ao carregar dados do usuário.', 'danger');
+}
+};
+
+// Update user function
+window.updateUser = async function() {
+if (userType !== 'admin') return;
+
+setButtonLoading('updateUserBtn', true);
+
+try {
+const id = document.getElementById('editUserId').value;
+const formData = {
+name: document.getElementById('editUserName').value.trim(),
+email: document.getElementById('editUserEmail').value.trim(),
+updatedAt: new Date(),
+updatedBy: currentUser.email
+};
+
+// Validate required fields
+if (!formData.name || !formData.email) {
+showAlert('Por favor, preencha todos os campos obrigatórios.', 'danger');
+return;
+}
+
+// Validate email format
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!emailRegex.test(formData.email)) {
+showAlert('Por favor, insira um email válido.', 'danger');
+return;
+}
+
+// Check if email is already in use by another user
+const usersQuery = query(collection(db, "users"));
+const usersSnapshot = await getDocs(usersQuery);
+let emailExists = false;
+
+usersSnapshot.forEach((doc) => {
+if (doc.id !== id && doc.data().email === formData.email) {
+emailExists = true;
+}
+});
+
+if (emailExists) {
+showAlert('Este email já está sendo usado por outro usuário.', 'danger');
+return;
+}
+
+const docRef = doc(db, "users", id);
+await updateDoc(docRef, formData);
+showAlert('Usuário atualizado com sucesso!', 'success');
+
+const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+modal.hide();
+
+await loadUsers();
+
+} catch (error) {
+console.error("Erro ao atualizar usuário:", error);
+showAlert('Erro ao atualizar usuário. Tente novamente.', 'danger');
+} finally {
+setButtonLoading('updateUserBtn', false);
+}
+};
+
+// Delete user function
+window.deleteUser = async function(id) {
+if (userType !== 'admin') return;
+
+const userData = usersData.get(id);
+if (!userData) {
+showAlert('Usuário não encontrado.', 'danger');
+return;
+}
+
+// Prevent admin from deleting themselves
+if (userData.email === currentUser.email) {
+showAlert('Você não pode excluir sua própria conta.', 'danger');
+return;
+}
+
+if (confirm(`Tem certeza que deseja excluir o usuário "${userData.name}"? Esta ação não pode ser desfeita.`)) {
+try {
+console.log("Excluindo usuário:", id);
+
+// Delete from Firestore
+await deleteDoc(doc(db, "users", id));
+
+// Remove from local cache
+usersData.delete(id);
+
+showAlert('Usuário excluído com sucesso!', 'success');
+
+// Reload users
+await loadUsers();
+} catch (error) {
+console.error("Erro ao excluir usuário:", error);
+showAlert('Erro ao excluir usuário. Tente novamente.', 'danger');
+}
+}
+};
 
 // Load reservations with enhanced error handling and retry (admin only)
 async function loadReservations(retryCount = 0) {
